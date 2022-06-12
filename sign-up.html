@@ -73,9 +73,9 @@
         </div>
     </nav>
 
-    <form action="action_page.php" style="border:1px solid #ccc">
+    <form action="sign-up.php" method="post" style="border:1px solid #ccc">
         <div class="container">
-            <p>Παρακαλώ προσθέστε τα στοιχεία σας για να δημιουργήσετε νέο λογαριασμό</p>
+            <p>Παρακαλώ προσθέστε τα στοιχεία σας για να δημιουργήσετε νέο λογαριασμό ...</p>
             <hr>
     
             <label for="First Name"><b>First Name</b></label>
@@ -89,15 +89,15 @@
             <div class="birthday">
             <select name="Day" id="day">
                 <option value="0">Ημέρα</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
+                <option value="01">1</option>
+                <option value="02">2</option>
+                <option value="03">3</option>
+                <option value="04">4</option>
+                <option value="05">5</option>
+                <option value="06">6</option>
+                <option value="07">7</option>
+                <option value="08">8</option>
+                <option value="09">9</option>
                 <option value="10">10</option>
                 <option value="11">11</option>
                 <option value="12">12</option>
@@ -123,15 +123,15 @@
             </select>
             <select name="month" id="month">
                 <option value="0">Μήνας</option>
-                <option value="1">Ιανουάριος</option>
-                <option value="2">Φεβρουάριος</option>
-                <option value="3">Μάρτιος</option>
-                <option value="4">Απρίλιος</option>
-                <option value="5" >Μάιος</option>
-                <option value="6">Ιούνιος</option>
-                <option value="7">Ιούλιος</option>
-                <option value="8">Άυγουστος</option>
-                <option value="9">Σεπτέμβριος</option>
+                <option value="01">Ιανουάριος</option>
+                <option value="02">Φεβρουάριος</option>
+                <option value="03">Μάρτιος</option>
+                <option value="04">Απρίλιος</option>
+                <option value="05" >Μάιος</option>
+                <option value="06">Ιούνιος</option>
+                <option value="07">Ιούλιος</option>
+                <option value="08">Άυγουστος</option>
+                <option value="09">Σεπτέμβριος</option>
                 <option value="10">Οκτώμβριος</option>
                 <option value="11">Νοέμβριος</option>
                 <option value="12">Δεκέμβριος</option>
@@ -178,8 +178,8 @@
             <label for="Gender"><b>Gender</b></label>
             <br>
             <div class="gender-radio">
-                <input type="radio" name="Gender">Άντρας
-                <input type="radio" name="Gender">Γυναίκα
+                <input type="radio" name="Gender" id="male" value="M">Άντρας
+                <input type="radio" name="Gender" id="female" value="F">Γυναίκα
             </div>
             <br>
 
