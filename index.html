@@ -1,3 +1,7 @@
+<?php
+    session_start();
+ 
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -51,10 +55,12 @@
 </head>
 
 <body> 
-        <div class="logo">
+    
+
+   <div class="logo">
             <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo" >
-        </div>
-        <nav class="navbar">
+    </div>
+    <nav class="navbar">
             <div class="navbar-links">
                 <ul class="nav-menu">
                     <li class = "nav-item">
@@ -64,6 +70,12 @@
                             <span class="icon-text">Home</span>
                         </a>
                     </li>
+
+                <?php
+                    if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
+                    // all aokey, user has session
+                ?>
+        
                     <li class="nav-item">
                         <a href="basics.html">
                             <span class="icon"></span>
@@ -80,12 +92,16 @@
                     </li>
 
                     <li class="nav-item">
-                        <a href="quiz.php">
+                        <a href="quiz.html">
                             <span class="icon"></span>
                             <img src="./media/Icons/icon-quiz.png" />
                             <span class="icon-text">Quiz</span>
                         </a>
                     </li>
+
+                <?php
+                }
+                ?>
                     <li class="nav-item">
                         <a href="sign-up.html">
                             <span class="icon"></span>
@@ -107,7 +123,18 @@
                     <span class="bar"></span>
                 </a>
             </div>
-        </nav>
+    </nav>
+
+    <?php
+        if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
+            // all aokey, user has session
+        }
+        else {
+            echo " <h5 style='color:red; margin-right:5px;margin-left-auto;' > Please login or sign in to access more content of this site. </h5>" ;
+        }
+    ?>
+     
+
     <div style="border:1px solid #ccc">
         
         <h1>Τι είναι το Bitcoin;</h1>

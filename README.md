@@ -27,13 +27,18 @@
   
 ## login.html <form action=**"login.php" method="post"** style="border:1px solid #ccc">  
 
-## all pages that require a loggedin user, such as quiz should be changed to .php instead of .html in order to use the session functionality of php  
+# .htaccess file in project's directory where .html files exists and must be treeted as .php for embeded php code (sessions)  
 
 ## quiz.php  added to replace quiz.html in order to support the php session  
 
-## index.html changed quiz link to point to quiz.php instead quiz.html  
+## index.html 
+ -- changed quiz link to point to quiz.php instead quiz.html  
+ -- 
 
-## TODO: form validation (javascript) in sign-up.html for required fields.  
+## TODO: 
+ - form validation (javascript) in sign-up.html for required fields.  
+ - logout page if user is loggedin
+
 
 
   
