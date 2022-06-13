@@ -1,4 +1,28 @@
-<!DOCTYPE html>
+<?php
+session_start();
+
+if(isset($_SERVER['HTTPS'])) $https = $_SERVER['HTTPS'];
+$serverport = $_SERVER['SERVER_PORT']; 
+$servname = $_SERVER['SERVER_NAME'];  
+    // If the script is running on a virtual host, this will be the value defined for that virtual host.
+$servaddr = $_SERVER['SERVER_ADDR']; 
+if($https == "") $https = "http://" ;  // alloiws https://
+$baseurl = $https . $servname . ":" . $serverport ; // build the base url, example http://localhost:80
+$self    = $_SERVER['PHP_SELF'] ;        // in a php script at the address http://example.com/foo/bar.php would be /foo/bar.php
+$webpath = dirname($_SERVER['PHP_SELF']); // in a php script at the address http://example.com/foo/bar.php would be /foo
+
+if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
+    // all aokey, user has session
+}
+else {
+
+    $url = "$baseurl/index.html";
+    // redirect back to sign-up.html
+    header("Location: $url");
+    die();
+}
+
+?><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">

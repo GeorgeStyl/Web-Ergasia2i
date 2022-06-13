@@ -1,14 +1,18 @@
+
 <?php
+
+// if(session_id() != '' || isset($_SESSION) || session_status() === PHP_SESSION_ACTIVE) {
+//  // session isn't started
+//  session_destroy();
+// }
+session_destroy();
 
 if(isset($_SERVER['HTTPS'])) $https = $_SERVER['HTTPS'];
 $serverport = $_SERVER['SERVER_PORT']; 
 $servname = $_SERVER['SERVER_NAME'];  
     // If the script is running on a virtual host, this will be the value defined for that virtual host.
 $servaddr = $_SERVER['SERVER_ADDR']; 
-
-
 if($https == "") $https = "http://" ;  // alloiws https://
-
 $baseurl = $https . $servname . ":" . $serverport ; // build the base url, example http://localhost:80
 $self    = $_SERVER['PHP_SELF'] ;        // in a php script at the address http://example.com/foo/bar.php would be /foo/bar.php
 $webpath = dirname($_SERVER['PHP_SELF']); // in a php script at the address http://example.com/foo/bar.php would be /foo
@@ -40,7 +44,8 @@ $fullwebpath = $baseurl . $webpath ;      // for this page would be http://local
     $usr = $_POST['usr'];
     $email = $_POST['email'];
     $psw = $_POST['psw'];
-    $remember = $_POST['remember'];
+    $remember = "";
+    if(isset($_POST['remember'])) $remember = $_POST['remember'];
     $DOB = "$year$month$Day";
 
     $mysqlserver = "localhost";
@@ -83,23 +88,36 @@ $fullwebpath = $baseurl . $webpath ;      // for this page would be http://local
    }
 
 
-   $sql = "INSERT INTO `users`(`FirstName`, `LastName`, `DateOfBirth`, `Gender`, `username`, `password`, `email`, `DateSigned`, `DateUpdated`, `IsActive` ) VALUES (". 
-   " '$fname', '$lname', '$DOB', '$Gender', '$usr', '$psw', '$email' , now() , now() , 1 ) ;";
-   
 
-  // echo $sql;
 
-   // send query
-   if ($conn->query($sql) === TRUE) {
+//    $sql = "INSERT INTO `users`(`FirstName`, `LastName`, `DateOfBirth`, `Gender`, `username`, `password`, `email`, `DateSigned`, `DateUpdated`, `IsActive` ,`sessionID`, `sessionDT`) VALUES (". 
+//    " '$fname', '$lname', '$DOB', '$Gender', '$usr', '$psw', '$email' , now() , now() , 1, '" . SID . "', now() ) ;";
+// sessionID 
+// sessionDT
+
+  $sql = "INSERT INTO `users`(`FirstName`, `LastName`, `DateOfBirth`, `Gender`, `username`, `password`, `email`, `DateSigned`, `DateUpdated`, `IsActive` ) VALUES (". 
+  " '$fname', '$lname', '$DOB', '$Gender', '$usr', '$psw', '$email' , now() , now() , 1 ) ;";
+
+  if ($conn->query($sql) === TRUE) {
+
         // TODO:: if remember me == yes , loginn in backgorund here, redirect to to quiz
-
-
-        // else if not remember me then redirect to login
-        $url = "$baseurl/login.html";
+        if($remember=="on") {
+          session_start();    // global $_SESSION created here  
+          $_SESSION["username"] = $usr;     
+          $_SESSION["firstname"]= $fname;     
+          $_SESSION["lastname"] = $lname;    
+          $_SESSION["email"]    = $email;    
+          $url = "$baseurl/quiz.php";
+        }
+        else {
+          // else if not remember me then redirect to login
+          $url = "$baseurl/login.html";
+        }
         // redirect back to sign-up.html
         header("Location: $url");
         // exit without any other for not to break the redirection
         die();
+
     } else {
         $url = "$baseurl/sign-up.html?error=registration_failed";
         // redirect back to sign-up.html
