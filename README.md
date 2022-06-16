@@ -14,30 +14,38 @@
 
 # **Αλλαγες στα ηδη υπαρχον files**
 ## sign-up.html
-  - form action =   <form action=**"sign-up.php" method="post"** style="border:1px solid #ccc">  
+  - form action =   <form action=**"sign-up.html" method="post"** style="border:1px solid #ccc">  
   - gender = <input type="radio" name="Gender" **id="male" value="M"**>Άντρας  
              <input type="radio" name="Gender" **id="female" value="F"**>Γυναίκα  
   - <select name="Day" id="day"> <option value=**"01"**>1</option>  
   - <select name="month" id="month"> = <option value=**"01"**>Ιανουάριος</option> 
-  
-## sign-up.php  
+  - all php code from sign-up.php moved in this page, at the top. This pages's form action calls the same page at post
+
+## sign-up.php --- DISCONTINUED .... ALL PHP CODE MOVED TO THE TOP OF sign-up.html !!    
   - uses PHP SESSION if user marked remember me=yes  
   - redirects user to quiz.php  (not quiz.html - change) if rememberme  
     else redirects user to login.html  
-  
-## login.html <form action=**"login.php" method="post"** style="border:1px solid #ccc">  
 
-# .htaccess file in project's directory where .html files exists and must be treeted as .php for embeded php code (sessions)  
+## login.php --- DISCONTINUED .... ALL PHP CODE MOVED TO THE TOP OF login.html !!    
+
+## login.html <form action=**"login.html" method="post"** style="border:1px solid #ccc">  
+ - all php code from login.php moved at the top of the login.html   
+ - login.php  DISCONTINUED  
+ - this page's form action points to itself so the form posts the data to this page
+
+# .htaccess file in project's directory where .html files exists and that must be treeted as .php for embeded php code (sessions)  
 
 ## quiz.php  added to replace quiz.html in order to support the php session  
+!!!! TODO:: move php code ftom the top of quiz.php to quiz.html and DISCONTINUE the quiz.html ...  
 
 ## index.html 
  -- changed quiz link to point to quiz.php instead quiz.html  
- -- 
+ -- !!! TODO:: change quiz link to point to quiz.html (see the above point) !!!  
 
 ## TODO: 
  - form validation (javascript) in sign-up.html for required fields.  
- - logout page if user is loggedin
+ - logout page if user is loggedin  (logout.html)  
+ 
 
 
 
