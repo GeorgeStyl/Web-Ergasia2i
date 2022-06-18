@@ -1,3 +1,6 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -96,6 +99,17 @@
             </a>
         </div>
     </nav>
+
+<?php
+    if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
+        // all aokey, user has session
+        echo "<h5> Welcome  " . $_SESSION["username"] . " ...</h5>";
+    }
+   else {
+    echo " No session, please signin";
+   }
+?>
+
 
     <div style="border:1px solid #ccc">
         <h2>Ποιος δημιούργησε το Bitcoin;</h3>

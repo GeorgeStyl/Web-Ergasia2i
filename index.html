@@ -128,6 +128,7 @@
     <?php
         if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
             // all aokey, user has session
+            echo "<h5> Welcome  " . $_SESSION["username"] . " ...</h5>";
         }
         else {
             echo " <h5 style='color:red; margin-right:5px;margin-left-auto;' > Please login or sign in to access more content of this site. </h5>" ;

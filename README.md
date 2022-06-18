@@ -36,7 +36,8 @@
 # .htaccess file in project's directory where .html files exists and that must be treeted as .php for embeded php code (sessions)  
 
 ## quiz.php  added to replace quiz.html in order to support the php session  
-!!!! TODO:: move php code ftom the top of quiz.php to quiz.html and DISCONTINUE the quiz.html ...  
+## TODO::
+- move php code from the top of quiz.php to quiz.html and DISCONTINUE the quiz.html ...  
 
 ## index.html 
  -- changed quiz link to point to quiz.php instead quiz.html  

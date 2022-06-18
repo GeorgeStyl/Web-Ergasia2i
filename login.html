@@ -1,12 +1,9 @@
 <?php
 
-/* $loginerror="";
-if( isset($_GET["loginerror"]) ) {
-    $loginerror = $_GET["loginerror"];
-}
-*/
+// session_start();
+// unset( $_SESSION["username"] );
 
-if(session_id() != '' || isset($_SESSION) || session_status() === PHP_SESSION_ACTIVE) 
+ if(session_id() != '' || isset($_SESSION) || session_status() === PHP_SESSION_ACTIVE) 
 {
     // start sess
    session_destroy();
@@ -82,6 +79,9 @@ if(session_id() != '' || isset($_SESSION) || session_status() === PHP_SESSION_AC
                     }
                     else
                     {
+
+                        session_start();
+                        $_SESSION["username"] = $_POST["usr"];
                         // login is success goto basics.html
                         $url = "$baseurl/basics.html?login=success";
                         header("Location: $url");
