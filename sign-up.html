@@ -1,6 +1,7 @@
 
 <?php
 
+
     if(session_id() != '' || isset($_SESSION) || session_status() === PHP_SESSION_ACTIVE) 
     {
         
@@ -40,7 +41,7 @@
 
         // login to DataBase credentials
         $mysqlserver = "localhost";
-        $mysqldb = "teliki_ergasia";
+        $mysqldb = "users";
         $mysqluser = "webapp";
         $mysqlpwd = "123456";
 
@@ -67,7 +68,7 @@
                 // output data of each row
                 while($row = $result->fetch_assoc()) 
                 {
-                    // echo "id: " . $row["id"]. " - Name: " . $row["firstname"]. " " . $row["lastname"]. "<br>";
+    
                     if( $row["CNTUSRS"] > 0 ) $validregistration=false;
                 }
             } 
@@ -185,7 +186,7 @@
 
     <form action="sign-up.html" method="post" 
     id="signupform" name="signupform"
-    style="border:1px solid #ccc" onsubmit="event.preventDefault(); validateMyForm();">
+    style="border:1px solid #ccc" onsubmit="event.preventDefault();">
         <div class="container">
             <p>Παρακαλώ προσθέστε τα στοιχεία σας για να δημιουργήσετε νέο λογαριασμό ...</p>
             <hr>
@@ -199,8 +200,8 @@
             <label for="Date of Birth"><b>Date of birth</b></label>
             <br>
             <div class="birthday">
-            <select name="Day" id="day">
-                <option value="0">Ημέρα</option>
+            <select name="Day" id="day" required>
+                <option value="">Ημέρα</option>
                 <option value="01">1</option>
                 <option value="02">2</option>
                 <option value="03">3</option>
@@ -233,8 +234,8 @@
                 <option value="30">30</option>
                 <option value="31">31</option>
             </select>
-            <select name="month" id="month">
-                <option value="0">Μήνας</option>
+            <select name="month" id="month" required>
+                <option value="">Μήνας</option>
                 <option value="01">Ιανουάριος</option>
                 <option value="02">Φεβρουάριος</option>
                 <option value="03">Μάρτιος</option>
@@ -248,8 +249,8 @@
                 <option value="11">Νοέμβριος</option>
                 <option value="12">Δεκέμβριος</option>
             </select>
-            <select name="year" id="year">
-                <option value="0">Έτος</option>
+            <select name="year" id="year" required>
+                <option value="">Έτος</option>
                 <option value="2022">2022</option>
                 <option value="2021">2021</option>
                 <option value="2020">2020</option>
@@ -290,7 +291,7 @@
             <label for="Gender"><b>Gender</b></label>
             <br>
             <div class="gender-radio">
-                <input type="radio" name="Gender" id="male" value="M">Άντρας
+                <input type="radio" name="Gender" id="male" value="M" required>Άντρας
                 <input type="radio" name="Gender" id="female" value="F">Γυναίκα
             </div>
             <br>
@@ -338,56 +339,5 @@
 
     <script src="./scripts/sign_up.js"></script>
     <script src="./scripts/navbar.js"></script>
-
-    <script>
-
-    function validateMyForm(){
-
-        let x = document.forms["signupform"]["fname"].value;
-        if (x == "") {
-            alert("Name must be filled out");
-            return false;
-        }
-
-        x = document.forms["signupform"]["lname"].value;
-        if (x == "") {
-            alert("Name must be filled out");
-            return false;
-        }
-       
-
-
-        alert( " Day value = " + document.forms["signupform"]["Day"].value);
-
-        x = document.forms["signupform"]["Day"].value;
-        if (x == "") {
-            alert("Name must be filled out");
-            return false;
-        }
-
-        /*
-        x = document.forms["signupform"]["lname"].value;
-        if (x == "") {
-            alert("Name must be filled out");
-            return false;
-        }
-
-        x = document.forms["signupform"]["lname"].value;
-        if (x == "") {
-            alert("Name must be filled out");
-            return false;
-        }
-
-        */
-
-        alert("validations passed");
-        return true;
-    }
-
-
- 
- 
-
-    </script>
 </body>
 </html>
