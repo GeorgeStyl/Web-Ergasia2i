@@ -1,7 +1,6 @@
 <?php
 session_start();
-
-if(isset($_SERVER['HTTPS'])) $https = $_SERVER['HTTPS'];
+/* if(isset($_SERVER['HTTPS'])) $https = $_SERVER['HTTPS'];
 $serverport = $_SERVER['SERVER_PORT']; 
 $servname = $_SERVER['SERVER_NAME'];  
     // If the script is running on a virtual host, this will be the value defined for that virtual host.
@@ -20,7 +19,7 @@ else {
     $url = "$baseurl/index.html";
     header("Location: $url");
     die();
-}
+*/
 
 ?>
 <!DOCTYPE html>

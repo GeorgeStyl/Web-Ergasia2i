@@ -57,72 +57,61 @@
 <body> 
     
 
-   <div class="logo">
-            <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo" >
+    <div class="logo">
+        <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
     </div>
     <nav class="navbar">
-            <div class="navbar-links">
-                <ul class="nav-menu">
-                    <li class = "nav-item">
-                        <a href="index.html">
-                            <span class="icon"></span>
-                            <img src="./media/Icons/icon-home.png" />
-                            <span class="icon-text">Home</span>
-                        </a>
-                    </li>
-
-                <?php
-                    if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
-                    // all aokey, user has session
-                ?>
-        
-                    <li class="nav-item">
-                        <a href="basics.html">
-                            <span class="icon"></span>
-                            <img src="./media/Icons/icon-basics.png" />
-                            <span class="icon-text">Basics</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="more.html">
-                            <span class="icon"></span>
-                            <img src="./media/Icons/icon-more.png" />
-                            <span class="icon-text">More</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href="quiz.html">
-                            <span class="icon"></span>
-                            <img src="./media/Icons/icon-quiz.png" />
-                            <span class="icon-text">Quiz</span>
-                        </a>
-                    </li>
-
-                <?php
-                }
-                ?>
-                    <li class="nav-item">
-                        <a href="sign-up.html">
-                            <span class="icon"></span>
-                            <img src="./media/Icons/icon-signup.png" />
-                            <span class="icon-text">Sign Up</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="login.html">
-                            <span class="icon"></span>
-                            <img src="./media/Icons/icon-login.png" />
-                            <span class="icon-text">Login</span>
-                        </a>
-                    </li>
-                </ul>
-                <a href="#" class="toggle-button">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                </a>
-            </div>
+        <div class="navbar-links">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-home.png" />
+                        <span class="icon-text">Home</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="basics.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-basics.png" />
+                        <span class="icon-text">Basics</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="more.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-more.png" />
+                        <span class="icon-text">More</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="quiz.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-quiz.png" />
+                        <span class="icon-text">Quiz</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="sign-up.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-signup.png" />
+                        <span class="icon-text">Sign Up</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="login.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-login.png" />
+                        <span class="icon-text">Login</span>
+                    </a>
+                </li>
+            </ul>
+            <a href="#" class="toggle-button">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </a>
+        </div>
     </nav>
 
     <?php
@@ -131,7 +120,7 @@
             echo "<h5> Welcome  " . $_SESSION["username"] . " ...</h5>";
         }
         else {
-            echo " <h5 style='color:red; margin-right:5px;margin-left-auto;' > Please login or sign in to access more content of this site. </h5>" ;
+            echo " <h5 style='color:red; margin-right:5px; margin-left-auto;' > Please login or sign in to access more content of this site. </h5>" ;
         }
     ?>
      
