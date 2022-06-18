@@ -46,6 +46,9 @@
  - form validation (javascript) in sign-up.html for required fields.  
  - logout page if user is loggedin  (logout.html)
  - create score on quiz for every user (included guests)  
+ - create a profile section on menu with icon
+ - create a profile settings page
+ 
  
 
 
