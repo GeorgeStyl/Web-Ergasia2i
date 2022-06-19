@@ -68,9 +68,13 @@ button:hover {
     background-color: orange;
 }
 
+.changeCredentialsBtn {
+    background-color: rgb(148, 18, 18);
+}
 
 
-.loginbtn,
+
+.changeCredentialsBtn, 
 .signupbtn {
     float: left;
     width: 50%;
