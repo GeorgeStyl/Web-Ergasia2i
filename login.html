@@ -8,7 +8,14 @@
     // start sess
    session_destroy();
 }
-
+$userid = 0;
+$FirstName="";
+$LastName="";
+$DateOfBirth="";
+$username="";
+$email="";
+$Gender="";
+$userrole="";
 
     if(isset($_SERVER['HTTPS'])) $https = $_SERVER['HTTPS'];
     else $https="";
@@ -61,14 +68,24 @@
                 }
                 else
                 {
-                    $sql ="select count(*) as ISVALID from `users` where ( `password`='$psw' or `username`='$usr') ;";
+                    $sql ="select `id`, `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `email`, `username`, " .
+                    "case when ISNULL(`userrole`) then 'visitor' else `userrole` end as userrole  from `users` where `username`='$usr' ;";
                     $validregistration = false;
                     $result = $conn->query($sql);
-                    if ($result->num_rows == 1) {
+                    if ($result->num_rows > 0) {
                         // output data of each row
                         while($row = $result->fetch_assoc()) {
-                        // echo "id: " . $row["id"]. " - Name: " . $row["firstname"]. " " . $row["lastname"]. "<br>";
-                            if( $row["ISVALID"] > 0 ) $validregistration=true;
+                            $validregistration=true;
+                            $userid = $row["id"]; 
+                            $FirstName =  $row["FirstName"];
+                            $LastName =  $row["LastName"];
+                            $Gender =  $row["Gender"];
+                            $DateOfBirth =  $row["DateOfBirth"];
+                            $username =  $row["username"];
+                            $email =  $row["email"];
+                            $userrole =  $row["userrole"];
+                            $hasError = false;
+                            $errormessage="OK";                             
                             break;
                         }
                     } 
@@ -81,7 +98,17 @@
                     {
 
                         session_start();
-                        $_SESSION["username"] = $_POST["usr"];
+        
+                        $_SESSION["FirstName"] = $FirstName;
+                        $_SESSION["LastName"] = $LastName;
+                        $_SESSION["Gender"] = $Gender ;
+                        $_SESSION["DateOfBirth"] = $DateOfBirth;
+                        $_SESSION["username"] = $username;
+                        $_SESSION["userid"] = $userid;
+                        $_SESSION["email"] = $email;
+                        $_SESSION["userrole"] = $userrole;
+                        $hasError = false;
+
                         // login is success goto basics.html
                         $url = "$baseurl/basics.html?login=success";
                         header("Location: $url");

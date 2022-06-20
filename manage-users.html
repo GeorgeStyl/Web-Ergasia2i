@@ -1,0 +1,350 @@
+<?php
+$hasError = false;
+$errormessage="";
+
+session_start();
+
+if(isset($_SERVER['HTTPS'])) $https = $_SERVER['HTTPS'];
+else $https="";
+$serverport = $_SERVER['SERVER_PORT']; 
+$servname = $_SERVER['SERVER_NAME'];  
+// If the script is running on a virtual host, this will be the value defined for that virtual host.
+$servaddr = $_SERVER['SERVER_ADDR']; 
+if($https == "") $https = "http://" ;  // alloiws https://
+$baseurl = $https . $servname . ":" . $serverport ; // build the base url, example http://localhost:80
+$self    = $_SERVER['PHP_SELF'] ;        // in a php script at the address http://example.com/foo/bar.php would be /foo/bar.php
+$webpath = dirname($_SERVER['PHP_SELF']); // in a php script at the address http://example.com/foo/bar.php would be /foo
+$fullwebpath = $baseurl . $webpath ;      // for this page would be http://localhost:80/webergasia1
+
+
+// login to DataBase credentials
+$mysqlserver = "localhost";
+$mysqldb = "teliki_ergasia";
+$mysqluser = "webapp";
+$mysqlpwd = "123456";
+
+
+$arrUsers = [];
+
+if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
+    $userrole = $_SESSION["userrole"];
+    $userid = $_SESSION["userid"];
+    if( $userrole == "administrator" ){
+        // Create connection
+        $conn = new mysqli($mysqlserver, $mysqluser, $mysqlpwd, $mysqldb);
+        // Check connection
+        if ($conn->connect_error) {
+            $hasError = true;
+            $errormessage="Connection Error";
+
+        }
+        else {
+            
+            if( $_SERVER['REQUEST_METHOD'] == 'POST') {
+                if( $_POST["action"] == "delete") {
+                    $sql="delete from `teliki_ergasia`.`users` where `users`.`id`=". $_POST["userid"] .";" ;
+                    $mysqlaction = $conn->query($sql); 
+                }
+                else if( $_POST["action"] == "update") {
+                    $sql="update `teliki_ergasia`.`users` set `users`.`userrole`='". $_POST["userrole"] ."', " .
+                    " `users`.`IsActive`=" .  $_POST["useractive"] . ", " . 
+                    " `users`.`DateUpdated`=Now() " .
+                    " where `users`.`id`=". $_POST["userid"] .";" ;
+                    $mysqlaction = $conn->query($sql); 
+                }
+            }
+
+            $sql="SELECT `users`.`id`,`users`.`FirstName`,`users`.`LastName`, `users`.`DateOfBirth`, `users`.`Gender`,".
+            "`users`.`username`, `users`.`password`, `users`.`email`, `users`.`DateSigned`,  `users`.`DateUpdated`,  `users`.`IsActive`,".
+            "`users`.`Image`, `users`.`ImageType`, `users`.`sessionID`, `users`.`sessionDT`, `users`.`userrole`".
+            " FROM `teliki_ergasia`.`users`;";
+            $result = $conn->query($sql);
+            while($row = $result->fetch_assoc()) {
+                $arru = [];
+                $arru['id'] = $row["id"] ;
+                $arru['FirstName'] = $row["FirstName"] ;
+                $arru['LastName'] = $row["LastName"] ;
+                $arru['DateOfBirth'] = $row["DateOfBirth"] ;
+                $arru['Gender'] = $row["Gender"] ;
+                $arru['username'] = $row["username"] ;
+                $arru['password'] = $row["password"] ;
+                $arru['email'] = $row["email"] ;
+                $arru['DateSigned'] = $row["DateSigned"] ;
+                $arru['DateUpdated'] = $row["DateUpdated"] ;
+                $arru['IsActive'] = $row["IsActive"] ;
+                $arru['userrole'] = $row["userrole"] ;
+                array_push($arrUsers,$arru);
+            }
+            $hasError = false;
+            $errormessage="OK";
+        }
+    }
+    else {
+        $hasError = true;
+        $errormessage="Not an Administrator";       
+    }
+}
+else {
+    $hasError = true;
+    $errormessage="No session";   
+}
+
+?><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage users</title>
+<link href="./styles/navbar_style.css" rel="stylesheet">
+<link href="./styles/sign_up_style.css" rel="stylesheet">
+<style>
+    body {
+        margin: 0;  
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    .btnok {
+        background-color: #04AA6D;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        cursor: pointer;
+        
+        opacity: 0.9;
+    }
+    .btncancel {
+        background-color: #ff8080;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        cursor: pointer;
+        
+        opacity: 0.9;
+    }
+    .qlistdiv {
+        margin-left:10px;
+        margin-right:10px;
+        padding-left: 10px;
+        min-width:800px;
+        width:auto;
+        height:auto;
+        border: 2px solid blue;
+    }
+
+</style> 
+<script type="text/javascript">
+
+function submituser(e){
+    // if .... 
+    return true;
+}
+
+function updateUser(uid){
+    document.forms["frmusermgm"]["action"].value="update";
+    document.forms["frmusermgm"]["userid"].value=uid;
+    let fuserrole = "userrole_"+uid;
+    let userrole = document.getElementById(fuserrole).value;
+    document.forms["frmusermgm"]["userrole"].value=userrole;
+    let fuseractive = "useractive_"+uid;
+    let useractive = document.getElementById(fuseractive).value;
+    document.forms["frmusermgm"]["useractive"].value=useractive;
+    document.getElementById("frmusermgm").submit();
+} 
+function deleteUser(uid){
+    document.forms["frmusermgm"]["action"].value="delete";
+    document.forms["frmusermgm"]["userid"].value=uid;
+    document.getElementById("frmusermgm").submit();
+}
+
+</script>
+</head>
+<body>
+<div class="logo">
+    <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
+</div>
+<nav class="navbar">
+        <div class="navbar-links">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-home.png" />
+                        <span class="icon-text">Home</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="basics.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-basics.png" />
+                        <span class="icon-text">Basics</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="more.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-more.png" />
+                        <span class="icon-text">More</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="quiz.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-quiz.png" />
+                        <span class="icon-text">Quiz</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="sign-up.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-signup.png" />
+                        <span class="icon-text">Sign Up</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="login.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-login.png" />
+                        <span class="icon-text">Login</span>
+                    </a>
+                </li>
+            </ul>
+            <a href="#" class="toggle-button">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </a>
+        </div>
+</nav>
+
+
+<?php 
+echo "<p>SESSIONS vars <br />";
+
+if(isset($_SESSION["FirstName"] )) echo "FirstName=".$_SESSION["FirstName"]; 
+echo "<br />";
+if(isset($_SESSION["LastName"] )) echo "LastName=".$_SESSION["LastName"]; 
+echo "<br />";
+if(isset($_SESSION["Gender"] )) echo "Gender=".$_SESSION["Gender"]; 
+echo "<br />";
+if(isset($_SESSION["DateOfBirth"] )) echo "DateOfBirth=".$_SESSION["DateOfBirth"]; 
+echo "<br />";
+if(isset($_SESSION["username"] )) echo "username=".$_SESSION["username"]; 
+echo "<br />";
+if(isset($_SESSION["userid"] )) echo "userid=".$_SESSION["userid"]; 
+echo "<br />";
+if(isset($_SESSION["email"] )) echo "email=".$_SESSION["email"]; 
+echo "<br />";
+if(isset($_SESSION["userrole"] )) echo "userrole=".$_SESSION["userrole"]; 
+echo "<br/>=== END</p>";
+?>
+
+<?php if($hasError == true ) {
+    echo '<h4 style="color:red;">' . $errormessage . '</h4>';
+}
+else { 
+?>
+    <div class="qlistdiv">
+    <table>
+    <thead>
+    <tr>
+        <th>id</th>
+        <th>Ονομα</th>
+        <th>Επώνυμο</th>
+        <th>Ενεργός</th>
+        <th>Πρόσβαση</th>
+        <th>Φύλο</th>
+        <th>username</th>
+        <th>eMail</th>
+    </tr>
+    </thead>
+    <tbody>
+    <?php for($i=0;$i<count($arrUsers);$i++){
+        echo "</tr>";
+
+        echo '<td>';
+            echo $arrUsers[$i]['id'] ;
+        echo '</td>';
+
+        echo '<td>';
+            echo $arrUsers[$i]['FirstName']  ;
+        echo '</td>';
+        echo '<td>';
+            echo $arrUsers[$i]['LastName'] ;
+        echo '</td>';
+
+        echo '<td>'; 
+
+        echo '<select id="useractive_' . $arrUsers[$i]['id'] . '" >';
+        echo '<option value="0"';
+        if($arrUsers[$i]['userrole']=="0") echo " selected ";
+        echo '>Ανενεργός</option>';
+        echo '<option value="1"';
+        if($arrUsers[$i]['IsActive']=="1") echo " selected ";
+        echo '>Ενεργός</option>';
+        echo '</select>';
+        echo " ..".$arrUsers[$i]['IsActive'] .".." ;
+
+        echo '</td>';
+
+        echo '<td>';
+        
+        echo '<select id="userrole_' . $arrUsers[$i]['id'] . '" >';
+        echo '<option value="registereduser"';
+        if($arrUsers[$i]['userrole']=="registereduser") echo " selected ";
+        echo '>Χρήστης</option>';
+        echo '<option value="moderator"';
+        if($arrUsers[$i]['userrole']=="moderator") echo " selected ";
+        echo '>Συντονιστής</option>';
+        echo '<option value="administrator"';
+        if($arrUsers[$i]['userrole']=="administrator") echo " selected ";
+        echo '>Διαχειριστής</option>';
+        echo '</select>';
+    
+        echo '</td>';
+
+        echo '<td>';
+        echo $arrUsers[$i]['Gender'];
+        echo '</td>';
+
+        echo '<td>';
+            echo $arrUsers[$i]['username'] ;
+        echo '</td>';
+
+        echo '<td>';
+            echo $arrUsers[$i]['email'] ;
+        echo '</td>';
+
+        echo '<td>';
+            echo '<button onclick="updateUser('. $arrUsers[$i]['id'] . ');">Ενημέρωση</button>';
+        echo '</td>';
+
+        echo '<td>';
+            echo '<button onclick="deleteUser(' . $arrUsers[$i]['id'] . ');">Διαγραφή</button>';
+        echo '</td>';
+
+        echo "</tr>";
+    }
+    ?>
+    </tbody>
+    </table>
+    </div>
+
+<?php
+}
+?>
+
+<div id="divform" style="display: none;" >
+
+<form id="frmusermgm" name="frmusermgm" method="post" action="manage-users.html" onsubmit="return submituser(event);" >
+action <input type="text" name="action" value="">
+id <input type="text" name="userid" value="">
+role <input type="text" name="userrole" value="">
+active <input type="text" name="useractive" value="">
+</form>
+
+</div>
+
+</body>
+</html>
