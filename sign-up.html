@@ -2,342 +2,513 @@
 <?php
 
 
-    if(session_id() != '' || isset($_SESSION) || session_status() === PHP_SESSION_ACTIVE) 
-    {
-        
+if(session_id() != '' || isset($_SESSION) || session_status() === PHP_SESSION_ACTIVE) 
+{    
     session_destroy();
-    }
-
-    if(isset($_SERVER['HTTPS'])) $https = $_SERVER['HTTPS'];
-    else $https="";
-    $serverport = $_SERVER['SERVER_PORT']; 
-    $servname = $_SERVER['SERVER_NAME'];  
-        // If the script is running on a virtual host, this will be the value defined for that virtual host.
-    $servaddr = $_SERVER['SERVER_ADDR']; 
-    if($https == "") $https = "http://" ;  // alloiws https://
-    $baseurl = $https . $servname . ":" . $serverport ; // build the base url, example http://localhost:80
-    $self    = $_SERVER['PHP_SELF'] ;        // in a php script at the address http://example.com/foo/bar.php would be /foo/bar.php
-    $webpath = dirname($_SERVER['PHP_SELF']); // in a php script at the address http://example.com/foo/bar.php would be /foo
-    $fullwebpath = $baseurl . $webpath ;      // for this page would be http://localhost:80/webergasia1
+}
 
 
-    $haserror = false;
-    $errormessage = "";
-    // if called with other verb than post we dont accept the request
-    if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) 
+session_start();
+if(isset($_SESSION["username"])) unset( $_SESSION["username"] );
+if(isset($_SESSION["userid"])) unset( $_SESSION["userid"] );
+if(isset($_SESSION["FirstName"])) unset( $_SESSION["FirstName"] );
+if(isset($_SESSION["LastName"])) unset( $_SESSION["LastName"] );
+if(isset($_SESSION["Gender"])) unset( $_SESSION["Gender"] );
+if(isset($_SESSION["DateOfBirth"])) unset( $_SESSION["DateOfBirth"] );
+if(isset($_SESSION["email"])) unset( $_SESSION["email"] );
+if(isset($_SESSION["userrole"])) unset( $_SESSION["userrole"] );
+
+$userid = 0;
+$FirstName="";
+$LastName="";
+$DateOfBirth="";
+$username="";
+$email="";
+$Gender="";
+$userrole="";
+
+
+if(isset($_SERVER['HTTPS'])) $https = $_SERVER['HTTPS'];
+else $https="";
+$serverport = $_SERVER['SERVER_PORT']; 
+$servname = $_SERVER['SERVER_NAME'];  
+    // If the script is running on a virtual host, this will be the value defined for that virtual host.
+$servaddr = $_SERVER['SERVER_ADDR']; 
+if($https == "") $https = "http://" ;  // alloiws https://
+$baseurl = $https . $servname . ":" . $serverport ; // build the base url, example http://localhost:80
+$self    = $_SERVER['PHP_SELF'] ;        // in a php script at the address http://example.com/foo/bar.php would be /foo/bar.php
+$webpath = dirname($_SERVER['PHP_SELF']); // in a php script at the address http://example.com/foo/bar.php would be /foo
+$fullwebpath = $baseurl . $webpath ;      // for this page would be http://localhost:80/webergasia1
+
+$haserror = false;
+$errormessage = "";
+// if called with other verb than post we dont accept the request
+if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) 
+{
+    // fname=...&lname=...&Day=09&month=09&year=2012&Gender=M&usr=tstylian&email=....&psw=123&psw-repeat=123&remember=on
+    $fname = $_POST['fname'];
+    $lname = $_POST['lname'];
+    $Day = $_POST['Day'];
+    $month = $_POST['month'];
+    $year = $_POST['year'];
+    $Gender = $_POST['Gender'];
+    $usr = $_POST['usr'];
+    $email = $_POST['email'];
+    $psw = $_POST['psw'];
+    $remember = "";
+    if(isset($_POST['remember'])) $remember = $_POST['remember'];
+    $DOB = "$year$month$Day";
+
+    // login to DataBase credentials
+    $mysqlserver = "localhost";
+    $mysqldb = "teliki_ergasia";
+    $mysqluser = "webapp";
+    $mysqlpwd = "123456";
+
+
+    // Create connection
+    $conn = new mysqli($mysqlserver, $mysqluser, $mysqlpwd, $mysqldb);
+
+    // Check connection
+    if ($conn->connect_error) 
     {
-        $fname = $_POST['fname'];
-        $lname = $_POST['lname'];
-        $Day = $_POST['Day'];
-        $month = $_POST['month'];
-        $year = $_POST['year'];
-        $Gender = $_POST['Gender'];
-        $usr = $_POST['usr'];
-        $email = $_POST['email'];
-        $psw = $_POST['psw'];
-        $remember = "";
-        if(isset($_POST['remember'])) $remember = $_POST['remember'];
-        $DOB = "$year$month$Day";
+        $haserror = true;
+        $errormessage = "Connect Error";
+    }
+    else
+    {
+        $sql="select count(*) as CNTUSRS from `users` where ( `email`='$email' or `username`='$usr') ;";
 
-        // login to DataBase credentials
-        $mysqlserver = "localhost";
-        $mysqldb = "teliki_ergasia";
-        $mysqluser = "webapp";
-        $mysqlpwd = "123456";
+        $validregistration = true;
 
-
-        // Create connection
-        $conn = new mysqli($mysqlserver, $mysqluser, $mysqlpwd, $mysqldb);
-
-        // Check connection
-        if ($conn->connect_error) 
+        $result = $conn->query($sql);
+        if ($result->num_rows > 0) 
         {
-            $haserror = true;
-            $errormessage = "Connect Error";
-        }
-        else
-        {
-
-            $sql="select count(*) as CNTUSRS from `users` where ( `email`='$email' or `username`='$usr') ;";
-
-            $validregistration = true;
-
-            $result = $conn->query($sql);
-            if ($result->num_rows > 0) 
+            // output data of each row
+            while($row = $result->fetch_assoc()) 
             {
-                // output data of each row
-                while($row = $result->fetch_assoc()) 
-                {
-    
-                    if( $row["CNTUSRS"] > 0 ) $validregistration=false;
-                }
-            } 
-            if($validregistration==false)
-            {
-                $haserror=true;
-                $errormessage="username or email exists";
+
+                if( $row["CNTUSRS"] > 0 ) $validregistration=false;
             }
-            else 
-            {
-                $sql = "INSERT INTO `users`(`FirstName`, `LastName`, `DateOfBirth`, `Gender`, `username`, `password`, `email`, `DateSigned`, `DateUpdated`, `IsActive` ) VALUES (". 
-                " '$fname', '$lname', '$DOB', '$Gender', '$usr', '$psw', '$email' , now() , now() , 1 ) ;";
+        } 
+        if($validregistration==false)
+        {
+            $haserror=true;
+            $errormessage="username or email exists";
+        }
+        else 
+        {
+            $sql = "INSERT INTO `users`(`FirstName`, `LastName`, `DateOfBirth`, `Gender`, `username`, `password`, `email`, `DateSigned`, `DateUpdated`, `IsActive` ) VALUES (". 
+            " '$fname', '$lname', '$DOB', '$Gender', '$usr', '$psw', '$email' , now() , now() , 1 ) ;";
 
-                if ($conn->query($sql) === TRUE) 
+            if ($conn->query($sql) === TRUE) 
+            {
+                // TODO:: if remember me == yes , loginn in backgorund here, redirect to to quiz
+                if($remember=="on") 
                 {
-                    // TODO:: if remember me == yes , loginn in backgorund here, redirect to to quiz
-                    if($remember=="on") 
+
+                    $sql ="select `id`, `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `email`, `username`, " .
+                    "case when ISNULL(`userrole`) then 'visitor' else `userrole` end as userrole  from `users` where `username`='$usr' ;";
+                    $validregistration = false;
+                    $result = $conn->query($sql);
+                    if ($result->num_rows > 0) {
+                        // output data of each row
+                        while($row = $result->fetch_assoc()) {
+                            $validregistration=true;
+                            $userid = $row["id"]; 
+                            $FirstName =  $row["FirstName"];
+                            $LastName =  $row["LastName"];
+                            $Gender =  $row["Gender"];
+                            $DateOfBirth =  $row["DateOfBirth"];
+                            $username =  $row["username"];
+                            $email =  $row["email"];
+                            $userrole =  $row["userrole"];
+                            $hasError = false;
+                            $errormessage="OK";                             
+                            break;
+                        }
+                    } 
+                    if($validregistration==false)
                     {
-                        session_start();    // global $_SESSION created here  
-                        $_SESSION["username"] = $usr;     
-                        $_SESSION["firstname"]= $fname;     
-                        $_SESSION["lastname"] = $lname;    
-                        $_SESSION["email"]    = $email;    
-                        $url = "$baseurl/quiz.php";
-                    }
-                    else 
-                    {
-                        // else if not remember me then redirect to login
+                        $haserror = true;
+                        $errormessage="User Not found or dublicate entries";
                         $url = "$baseurl/login.html";
                     }
-                    // redirect back to sign-up.html
-                    header("Location: $url");
-                    // exit without any other for not to break the redirection
-                    die();
+                    else {
+                        $_SESSION["FirstName"] = $FirstName;
+                        $_SESSION["LastName"] = $LastName;
+                        $_SESSION["Gender"] = $Gender ;
+                        $_SESSION["DateOfBirth"] = $DateOfBirth;
+                        $_SESSION["username"] = $username;
+                        $_SESSION["userid"] = $userid;
+                        $_SESSION["email"] = $email;
+                        $_SESSION["userrole"] = $userrole;
+                        $hasError = false;
+                        // !!!!!!!!!!!!!!!!!!!
+                        session_write_close();
+                        
+                        $url = "$baseurl/index.html"; 
+                    }
+                    
+                    /* session_start();    // global $_SESSION created here  
+                    $_SESSION["username"] = $usr;     
+                    $_SESSION["firstname"]= $fname;     
+                    $_SESSION["lastname"] = $lname;    
+                    $_SESSION["email"]    = $email;   
+                    $url = "$baseurl/quiz.php";
+                    */  
+
                 }
+                else 
+                {
+                    // else if not remember me then redirect to login
+                    $url = "$baseurl/login.html";
+                }
+                // redirect back to sign-up.html
+                header("Location: $url");
+                // exit without any other for not to break the redirection
+                die();
             }
-            $conn->close();
         }
+        $conn->close();
     }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eγγραφή</title>
-    <link href="./styles/navbar_style.css" rel="stylesheet">
-    <link href="./styles/sign_up_style.css" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;  
-            font-family: Arial, Helvetica, sans-serif;
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eγγραφή</title>
+<link href="./styles/navbar_style.css" rel="stylesheet">
+<link href="./styles/sign_up_style.css" rel="stylesheet">
+<style>
+    body {
+        margin: 0;  
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+</style>
+
+<script type="text/javascript">
+
+    function signupSubmit(){
+        
+        let message = "";
+        let str = "";
+        let isValid = true; 
+        str = document.forms["signupform"]["fname"].value;
+        let fname = str.replace(/^\s+|\s+$/gm,'');          // trim spaces
+        if(fname==""){
+            message += "No Firstname.";
+            isValid = false; 
+        }
+        str = document.forms["signupform"]["lname"].value;
+        let lname = str.replace(/^\s+|\s+$/gm,'');
+        if(lname==""){
+            message += "No Lastname.";
+            isValid = false; 
+        }
+        str = document.forms["signupform"]["Day"].value;
+        let Day = str.replace(/^\s+|\s+$/gm,'');
+        if(Day==""){
+            message += "No Day.";
+            isValid = false; 
+        }
+        // <select name="Day" id="day" required>
+        str = document.forms["signupform"]["month"].value;
+        let month = str.replace(/^\s+|\s+$/gm,'');
+        if(month==""){
+            message += "No month.";
+            isValid = false; 
+        }
+        str = document.forms["signupform"]["year"].value;
+        let year = str.replace(/^\s+|\s+$/gm,'');
+        if(year==""){
+            message += "No year.";
+            isValid = false; 
+        }
+        str = document.forms["signupform"]["Gender"].value;
+        let Gender = str.replace(/^\s+|\s+$/gm,'');
+        if(Gender==""){
+            message += "No Gender.";
+            isValid = false; 
+        }
+        //    <input type="radio" name="Gender" id="male" value="M" required>Άντρας
+        //    <input type="radio" name="Gender" id="female" value="F">Γυναίκα
+        str = document.forms["signupform"]["usr"].value;
+        let usr = str.replace(/^\s+|\s+$/gm,'');
+        if(usr==""){
+            message += "No username.";
+            isValid = false; 
+        }
+        str = document.forms["signupform"]["email"].value;
+        let email = str.replace(/^\s+|\s+$/gm,'');
+        if(email==""){
+            message += "No email.";
+            isValid = false; 
+        }
+        str = document.forms["signupform"]["psw"].value;
+        let psw = str.replace(/^\s+|\s+$/gm,'');
+        if(psw==""){
+            message += "No password.";
+            isValid = false; 
+        }
+        str = document.forms["signupform"]["psw-repeat"].value; 
+        let pswrepeat = str.replace(/^\s+|\s+$/gm,'');  
+        if(pswrepeat==""){
+            message += "No confirmation password.";
+            isValid = false; 
         }
 
-    </style>
+        if(isValid==false){
+            alert(message);
+        }
+        
+        return isValid;
+
+
+    }
+
+</script>
 </head>
 <body>
-    <div class="logo">
-        <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
+
+<!-- < ? php include 'site-menu.php'; ? > -->
+
+<div class="logo">
+    <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
+</div>
+<nav class="navbar">
+    <div class="navbar-links">
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="index.html">
+                    <span class="icon"></span>
+                    <img src="./media/Icons/icon-home.png" />
+                    <span class="icon-text">Home</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="basics.html">
+                    <span class="icon"></span>
+                    <img src="./media/Icons/icon-basics.png" />
+                    <span class="icon-text">Basics</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="more.html">
+                    <span class="icon"></span>
+                    <img src="./media/Icons/icon-more.png" />
+                    <span class="icon-text">More</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="quiz.html">
+                    <span class="icon"></span>
+                    <img src="./media/Icons/icon-quiz.png" />
+                    <span class="icon-text">Quiz</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="sign-up.html">
+                    <span class="icon"></span>
+                    <img src="./media/Icons/icon-signup.png" />
+                    <span class="icon-text">Sign Up</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="login.html">
+                    <span class="icon"></span>
+                    <img src="./media/Icons/icon-login.png" />
+                    <span class="icon-text">Login</span>
+                </a>
+            </li>
+        </ul>
+        <a href="#" class="toggle-button">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </a>
     </div>
-    <nav class="navbar">
-        <div class="navbar-links">
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="index.html">
-                        <span class="icon"></span>
-                        <img src="./media/Icons/icon-home.png" />
-                        <span class="icon-text">Home</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="basics.html">
-                        <span class="icon"></span>
-                        <img src="./media/Icons/icon-basics.png" />
-                        <span class="icon-text">Basics</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="more.html">
-                        <span class="icon"></span>
-                        <img src="./media/Icons/icon-more.png" />
-                        <span class="icon-text">More</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="quiz.html">
-                        <span class="icon"></span>
-                        <img src="./media/Icons/icon-quiz.png" />
-                        <span class="icon-text">Quiz</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="sign-up.html">
-                        <span class="icon"></span>
-                        <img src="./media/Icons/icon-signup.png" />
-                        <span class="icon-text">Sign Up</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="login.html">
-                        <span class="icon"></span>
-                        <img src="./media/Icons/icon-login.png" />
-                        <span class="icon-text">Login</span>
-                    </a>
-                </li>
-            </ul>
-            <a href="#" class="toggle-button">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </a>
+</nav>
+
+<?php 
+/*
+echo "<p>SESSION vars <br />";    
+if(isset($_SESSION["FirstName"] )) echo "FirstName=".$_SESSION["FirstName"]; 
+echo "<br />";
+if(isset($_SESSION["LastName"] )) echo "LastName=".$_SESSION["LastName"]; 
+echo "<br />";
+if(isset($_SESSION["Gender"] )) echo "Gender=".$_SESSION["Gender"]; 
+echo "<br />";
+if(isset($_SESSION["DateOfBirth"] )) echo "DateOfBirth=".$_SESSION["DateOfBirth"]; 
+echo "<br />";
+if(isset($_SESSION["username"] )) echo "username=".$_SESSION["username"]; 
+echo "<br />";
+if(isset($_SESSION["userid"] )) echo "userid=".$_SESSION["userid"]; 
+echo "<br />";
+if(isset($_SESSION["email"] )) echo "email=".$_SESSION["email"]; 
+echo "<br />";
+if(isset($_SESSION["userrole"] )) echo "userrole=".$_SESSION["userrole"]; 
+echo "<br/>=== END</p>";
+*/
+?>
+
+<form action="sign-up.html" method="post" id="signupform" name="signupform"
+style="border:1px solid #ccc" onsubmit="return signupSubmit();">
+    <div class="container">
+        <p>Παρακαλώ προσθέστε τα στοιχεία σας για να δημιουργήσετε νέο λογαριασμό ...</p>
+        <hr>
+
+        <label for="First Name"><b>First Name</b></label>
+        <input type="text" placeholder="Εισάγετε το όνομα" name="fname" required>
+
+        <label for="Last Name"><b>Last Name</b></label>
+        <input type="text" placeholder="Εισάγετε το επίθετο" name="lname" required>
+
+        <label for="Date of Birth"><b>Date of birth</b></label>
+        <br>
+        <div class="birthday">
+        <select name="Day" id="day" required>
+            <option value="">Ημέρα</option>
+            <option value="01">1</option>
+            <option value="02">2</option>
+            <option value="03">3</option>
+            <option value="04">4</option>
+            <option value="05">5</option>
+            <option value="06">6</option>
+            <option value="07">7</option>
+            <option value="08">8</option>
+            <option value="09">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+            <option value="16">16</option>
+            <option value="17">17</option>
+            <option value="18">18</option>
+            <option value="19">19</option>
+            <option value="20">20</option>
+            <option value="21">21</option>
+            <option value="22">22</option>
+            <option value="23">23</option>
+            <option value="24">24</option>
+            <option value="25">25</option>
+            <option value="26">26</option>
+            <option value="27">27</option>
+            <option value="28">28</option>
+            <option value="29">29</option>
+            <option value="30">30</option>
+            <option value="31">31</option>
+        </select>
+        <select name="month" id="month" required>
+            <option value="">Μήνας</option>
+            <option value="01">Ιανουάριος</option>
+            <option value="02">Φεβρουάριος</option>
+            <option value="03">Μάρτιος</option>
+            <option value="04">Απρίλιος</option>
+            <option value="05" >Μάιος</option>
+            <option value="06">Ιούνιος</option>
+            <option value="07">Ιούλιος</option>
+            <option value="08">Άυγουστος</option>
+            <option value="09">Σεπτέμβριος</option>
+            <option value="10">Οκτώμβριος</option>
+            <option value="11">Νοέμβριος</option>
+            <option value="12">Δεκέμβριος</option>
+        </select>
+        <select name="year" id="year" required>
+            <option value="">Έτος</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+            <option value="2020">2020</option>
+            <option value="2019">2019</option>
+            <option value="2018">2018</option>
+            <option value="2017">2017</option>
+            <option value="2016">2016</option>
+            <option value="2015">2015</option>
+            <option value="2014">2014</option>
+            <option value="2013">2013</option>
+            <option value="2012">2012</option>
+            <option value="2011">2011</option>
+            <option value="2010">2010</option>
+            <option value="2009">2009</option>
+            <option value="2008">2008</option>
+            <option value="2007">2007</option>
+            <option value="2006">2006</option>
+            <option value="2005">2005</option>
+            <option value="2004">2004</option>
+            <option value="2003">2003</option>
+            <option value="2002">2002</option>
+            <option value="2001">2001</option>
+            <option value="2000">2000</option>
+            <option value="1999">1999</option>
+            <option value="1998">1998</option>
+            <option value="1997">1997</option>
+            <option value="1996">1996</option>
+            <option value="1995">1995</option>
+            <option value="1994">1994</option>
+            <option value="1993">1993</option>
+            <option value="1992">1992</option>
+            <option value="1991">1991</option>
+            <option value="1990">1990</option>
+        </select>
         </div>
-    </nav>
+        <br>
 
-    <form action="sign-up.html" method="post" 
-    id="signupform" name="signupform"
-    style="border:1px solid #ccc" onsubmit="event.preventDefault();">
-        <div class="container">
-            <p>Παρακαλώ προσθέστε τα στοιχεία σας για να δημιουργήσετε νέο λογαριασμό ...</p>
-            <hr>
-    
-            <label for="First Name"><b>First Name</b></label>
-            <input type="text" placeholder="Εισάγετε το όνομα" name="fname" required>
-
-            <label for="Last Name"><b>Last Name</b></label>
-            <input type="text" placeholder="Εισάγετε το επίθετο" name="lname" required>
-
-            <label for="Date of Birth"><b>Date of birth</b></label>
-            <br>
-            <div class="birthday">
-            <select name="Day" id="day" required>
-                <option value="">Ημέρα</option>
-                <option value="01">1</option>
-                <option value="02">2</option>
-                <option value="03">3</option>
-                <option value="04">4</option>
-                <option value="05">5</option>
-                <option value="06">6</option>
-                <option value="07">7</option>
-                <option value="08">8</option>
-                <option value="09">9</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
-                <option value="13">13</option>
-                <option value="14">14</option>
-                <option value="15">15</option>
-                <option value="16">16</option>
-                <option value="17">17</option>
-                <option value="18">18</option>
-                <option value="19">19</option>
-                <option value="20">20</option>
-                <option value="21">21</option>
-                <option value="22">22</option>
-                <option value="23">23</option>
-                <option value="24">24</option>
-                <option value="25">25</option>
-                <option value="26">26</option>
-                <option value="27">27</option>
-                <option value="28">28</option>
-                <option value="29">29</option>
-                <option value="30">30</option>
-                <option value="31">31</option>
-            </select>
-            <select name="month" id="month" required>
-                <option value="">Μήνας</option>
-                <option value="01">Ιανουάριος</option>
-                <option value="02">Φεβρουάριος</option>
-                <option value="03">Μάρτιος</option>
-                <option value="04">Απρίλιος</option>
-                <option value="05" >Μάιος</option>
-                <option value="06">Ιούνιος</option>
-                <option value="07">Ιούλιος</option>
-                <option value="08">Άυγουστος</option>
-                <option value="09">Σεπτέμβριος</option>
-                <option value="10">Οκτώμβριος</option>
-                <option value="11">Νοέμβριος</option>
-                <option value="12">Δεκέμβριος</option>
-            </select>
-            <select name="year" id="year" required>
-                <option value="">Έτος</option>
-                <option value="2022">2022</option>
-                <option value="2021">2021</option>
-                <option value="2020">2020</option>
-                <option value="2019">2019</option>
-                <option value="2018">2018</option>
-                <option value="2017">2017</option>
-                <option value="2016">2016</option>
-                <option value="2015">2015</option>
-                <option value="2014">2014</option>
-                <option value="2013">2013</option>
-                <option value="2012">2012</option>
-                <option value="2011">2011</option>
-                <option value="2010">2010</option>
-                <option value="2009">2009</option>
-                <option value="2008">2008</option>
-                <option value="2007">2007</option>
-                <option value="2006">2006</option>
-                <option value="2005">2005</option>
-                <option value="2004">2004</option>
-                <option value="2003">2003</option>
-                <option value="2002">2002</option>
-                <option value="2001">2001</option>
-                <option value="2000">2000</option>
-                <option value="1999">1999</option>
-                <option value="1998">1998</option>
-                <option value="1997">1997</option>
-                <option value="1996">1996</option>
-                <option value="1995">1995</option>
-                <option value="1994">1994</option>
-                <option value="1993">1993</option>
-                <option value="1992">1992</option>
-                <option value="1991">1991</option>
-                <option value="1990">1990</option>
-            </select>
-            </div>
-            <br>
-
-            <label for="Gender"><b>Gender</b></label>
-            <br>
-            <div class="gender-radio">
-                <input type="radio" name="Gender" id="male" value="M" required>Άντρας
-                <input type="radio" name="Gender" id="female" value="F">Γυναίκα
-            </div>
-            <br>
-
-            <label for="Username"><b>Username</b></label>
-            <input type="text" placeholder="Εισάγετε το username" name="usr" required>
-
-            <label for="email"><b>Email</b></label>
-            <input type="text" placeholder="Εισάγετε το email" name="email" required>
-            
-            <label for="psw"><b>Password</b></label>
-            <input type="password" placeholder="Εισάγετε το password" name="psw" required>
-            <div class="psw-repeat">
-                <label for="psw-repeat"><b>Confirm Password</b></label>
-                <input type="password" placeholder="Εισάγετε ξανά το password" name="psw-repeat" required>
-                <i class="uil uil-lock icon"></i>
-                <i class="uil uil-eye-slash showHidePw"></i>
-            </div>
-
-            <label for="upload-photo"><b>Upload Photo</b></label>
-            <input type="file" id="real-file" hidden="hidden">
-            <span id="custom-text">Δεν έχετε επιλέξει κάποιο αρχείο ακόμα</span>
-            <button type="button" id="custom-button">Επιλέξτε αρχείο</button>
-            <br>
-            <label>
-                <input type="checkbox" checked="checked" name="remember" style="margin-bottom:15px"> Αποθήκευση συσκευής
-            </label>
-    
-            <p>Με την εγγραφή συμφωνείς με τους <a href="#" style="color:dodgerblue">Όρους χρήσης και Πολιτικής απορρήτου</a>.</p>
-    
-
-            <?php if($haserror) { ?>
-                <p style="font-weight:bold;color:red;">
-                    <?php echo $errormessage; ?>
-                </p>
-            <?php } ?>
-            <div class="clearfix">
-                <button type="button" class="loginbtn" onclick="window.location.href='login.html'">Είστε ήδη χρήστης; Πατήστε εδώ</button>
-                <button type="submit" class="signupbtn">Eγγραφή</button>
-            </div>
-
-            <div class="birthday"></div>
+        <label for="Gender"><b>Gender</b></label>
+        <br>
+        <div class="gender-radio">
+            <input type="radio" name="Gender" id="male" value="M" required>Άντρας
+            <input type="radio" name="Gender" id="female" value="F">Γυναίκα
         </div>
-    </form>
+        <br>
 
-    <script src="./scripts/sign_up.js"></script>
-    <script src="./scripts/navbar.js"></script>
+        <label for="Username"><b>Username</b></label>
+        <input type="text" placeholder="Εισάγετε το username" name="usr" required>
+
+        <label for="email"><b>Email</b></label>
+        <input type="text" placeholder="Εισάγετε το email" name="email" required>
+        
+        <label for="psw"><b>Password</b> (no spaces)</label>
+        <input type="password" placeholder="Εισάγετε το password" name="psw" required>
+        <div class="psw-repeat">
+            <label for="psw-repeat"><b>Confirm Password</b> (no spaces)</label>
+            <input type="password" placeholder="Εισάγετε ξανά το password" name="psw-repeat" required>
+            <i class="uil uil-lock icon"></i>
+            <i class="uil uil-eye-slash showHidePw"></i>
+        </div>
+
+        <label for="upload-photo"><b>Upload Photo</b></label>
+        <input type="file" id="real-file" hidden="hidden">
+        <span id="custom-text">Δεν έχετε επιλέξει κάποιο αρχείο ακόμα</span>
+        <button type="button" id="custom-button">Επιλέξτε αρχείο</button>
+        <br>
+        <label>
+            <input type="checkbox" checked="checked" name="remember" style="margin-bottom:15px"> Αποθήκευση συσκευής
+        </label>
+
+        <p>Με την εγγραφή συμφωνείς με τους <a href="#" style="color:dodgerblue">Όρους χρήσης και Πολιτικής απορρήτου</a>.</p>
+
+
+        <?php if($haserror) { ?>
+            <p style="font-weight:bold;color:red;">
+                <?php echo $errormessage; ?>
+            </p>
+        <?php } ?>
+        <div class="clearfix">
+            <button type="button" class="loginbtn" onclick="window.location.href='login.html'">Είστε ήδη χρήστης; Πατήστε εδώ</button>
+            <button type="submit" class="signupbtn">Eγγραφή</button>
+        </div>
+
+        <div class="birthday"></div>
+    </div>
+</form>
+
+<script src="./scripts/sign_up.js"></script>
+<script src="./scripts/navbar.js"></script>
 </body>
 </html>
