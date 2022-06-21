@@ -1,13 +1,23 @@
 <?php
 
-// session_start();
-// unset( $_SESSION["username"] );
-
- if(session_id() != '' || isset($_SESSION) || session_status() === PHP_SESSION_ACTIVE) 
+if(session_id() != '' || isset($_SESSION) || session_status() === PHP_SESSION_ACTIVE) 
 {
     // start sess
    session_destroy();
 }
+
+
+session_start();
+if(isset($_SESSION["username"])) unset( $_SESSION["username"] );
+if(isset($_SESSION["userid"])) unset( $_SESSION["userid"] );
+if(isset($_SESSION["FirstName"])) unset( $_SESSION["FirstName"] );
+if(isset($_SESSION["LastName"])) unset( $_SESSION["LastName"] );
+if(isset($_SESSION["Gender"])) unset( $_SESSION["Gender"] );
+if(isset($_SESSION["DateOfBirth"])) unset( $_SESSION["DateOfBirth"] );
+if(isset($_SESSION["email"])) unset( $_SESSION["email"] );
+if(isset($_SESSION["userrole"])) unset( $_SESSION["userrole"] );
+
+
 $userid = 0;
 $FirstName="";
 $LastName="";
@@ -69,8 +79,10 @@ $userrole="";
                 else
                 {
                     $sql ="select `id`, `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `email`, `username`, " .
-                    "case when ISNULL(`userrole`) then 'visitor' else `userrole` end as userrole  from `users` where `username`='$usr' ;";
+                    "case when ISNULL(`userrole`) then 'visitor' else `userrole` end as userrole  from `teliki_ergasia`.`users` ".
+                    " where `username`='$usr' and  `password`= '$psw' ;";
                     $validregistration = false;
+
                     $result = $conn->query($sql);
                     if ($result->num_rows > 0) {
                         // output data of each row
@@ -96,9 +108,9 @@ $userrole="";
                     }
                     else
                     {
-
-                        session_start();
-        
+                        // --- changes 21/6
+                        // --------- session_start();
+                        // --- end of changes 21/6
                         $_SESSION["FirstName"] = $FirstName;
                         $_SESSION["LastName"] = $LastName;
                         $_SESSION["Gender"] = $Gender ;
@@ -108,6 +120,10 @@ $userrole="";
                         $_SESSION["email"] = $email;
                         $_SESSION["userrole"] = $userrole;
                         $hasError = false;
+                        
+                        // -- changes 21/6   !!!!!!!!!!!!!!!!!!!!
+                        session_write_close();
+                        // --- end of changes 21/6
 
                         // login is success goto basics.html
                         $url = "$baseurl/basics.html?login=success";
@@ -140,6 +156,8 @@ $userrole="";
 </head>
 
 <body>
+    <?php include 'site-menu.php';?>
+<!--
     <div class="logo">
         <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
     </div>
@@ -196,7 +214,30 @@ $userrole="";
             </a>
         </div>
     </nav>
+-->
 
+    <?php // DEBUG
+    /*
+    echo "<p>SESSION vars <br />";
+    if(isset($_SESSION["FirstName"] )) echo "FirstName=".$_SESSION["FirstName"]; 
+    echo "<br />";
+    if(isset($_SESSION["LastName"] )) echo "LastName=".$_SESSION["LastName"]; 
+    echo "<br />";
+    if(isset($_SESSION["Gender"] )) echo "Gender=".$_SESSION["Gender"]; 
+    echo "<br />";
+    if(isset($_SESSION["DateOfBirth"] )) echo "DateOfBirth=".$_SESSION["DateOfBirth"]; 
+    echo "<br />";
+    if(isset($_SESSION["username"] )) echo "username=".$_SESSION["username"]; 
+    echo "<br />";
+    if(isset($_SESSION["userid"] )) echo "userid=".$_SESSION["userid"]; 
+    echo "<br />";
+    if(isset($_SESSION["email"] )) echo "email=".$_SESSION["email"]; 
+    echo "<br />";
+    if(isset($_SESSION["userrole"] )) echo "userrole=".$_SESSION["userrole"]; 
+    echo "<br/>=== END</p>";
+    */
+    ?>
+    
     <form action="login.html" method="post" style="border:1px solid #ccc">
         <div class="container">
             <p>Παρακαλώ προσθέστε τα στοιχεία σας για να συνδεθείτε στον λογαριασμό</p>
