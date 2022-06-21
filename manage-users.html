@@ -161,6 +161,7 @@ function deleteUser(uid){
 </script>
 </head>
 <body>
+
 <div class="logo">
     <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
 </div>
@@ -218,10 +219,11 @@ function deleteUser(uid){
         </div>
 </nav>
 
+<!-- < ? php include 'site-menu.php'; ? > -->
 
-<?php 
-echo "<p>SESSIONS vars <br />";
-
+<?php // DEBUG
+/*
+echo "<p>SESSION vars <br />";
 if(isset($_SESSION["FirstName"] )) echo "FirstName=".$_SESSION["FirstName"]; 
 echo "<br />";
 if(isset($_SESSION["LastName"] )) echo "LastName=".$_SESSION["LastName"]; 
@@ -238,6 +240,7 @@ if(isset($_SESSION["email"] )) echo "email=".$_SESSION["email"];
 echo "<br />";
 if(isset($_SESSION["userrole"] )) echo "userrole=".$_SESSION["userrole"]; 
 echo "<br/>=== END</p>";
+*/
 ?>
 
 <?php if($hasError == true ) {
@@ -277,13 +280,17 @@ else {
         echo '<td>'; 
 
         echo '<select id="useractive_' . $arrUsers[$i]['id'] . '" >';
+
         echo '<option value="0"';
         if($arrUsers[$i]['userrole']=="0") echo " selected ";
         echo '>Ανενεργός</option>';
+
         echo '<option value="1"';
         if($arrUsers[$i]['IsActive']=="1") echo " selected ";
         echo '>Ενεργός</option>';
+
         echo '</select>';
+
         echo " ..".$arrUsers[$i]['IsActive'] .".." ;
 
         echo '</td>';
@@ -291,21 +298,25 @@ else {
         echo '<td>';
         
         echo '<select id="userrole_' . $arrUsers[$i]['id'] . '" >';
-        echo '<option value="registereduser"';
+        
+            echo '<option value="registereduser"';
         if($arrUsers[$i]['userrole']=="registereduser") echo " selected ";
         echo '>Χρήστης</option>';
+        
         echo '<option value="moderator"';
         if($arrUsers[$i]['userrole']=="moderator") echo " selected ";
         echo '>Συντονιστής</option>';
+        
         echo '<option value="administrator"';
         if($arrUsers[$i]['userrole']=="administrator") echo " selected ";
         echo '>Διαχειριστής</option>';
+        
         echo '</select>';
     
         echo '</td>';
 
         echo '<td>';
-        echo $arrUsers[$i]['Gender'];
+            echo $arrUsers[$i]['Gender'];
         echo '</td>';
 
         echo '<td>';
@@ -317,11 +328,11 @@ else {
         echo '</td>';
 
         echo '<td>';
-            echo '<button onclick="updateUser('. $arrUsers[$i]['id'] . ');">Ενημέρωση</button>';
+            echo '<button onclick="updateUser('. $arrUsers[$i]['id'] . ');" class="btnok">Ενημέρωση</button>';
         echo '</td>';
 
         echo '<td>';
-            echo '<button onclick="deleteUser(' . $arrUsers[$i]['id'] . ');">Διαγραφή</button>';
+            echo '<button onclick="deleteUser(' . $arrUsers[$i]['id'] . ');" class="btncancel">Διαγραφή</button>';
         echo '</td>';
 
         echo "</tr>";

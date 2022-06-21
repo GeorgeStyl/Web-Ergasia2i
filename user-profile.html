@@ -1,9 +1,9 @@
 <?php
-    $hasError = false;
-    $errormessage="";
     session_start();
 
-
+    $hasError = false;
+    $errormessage="";
+ 
     $FirstName="";
     $LastName="";
     $DateOfBirth="";
@@ -31,7 +31,7 @@
         else
         {
             $usr = $_SESSION["username"];
-            $sql ="select `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `email`, `username`  from `users` where (  `username`='$usr') ;";
+            $sql ="select `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `email`, `username`  from `teliki_ergasia`.`users` where (  `username`='$usr') ;";
             /*
                FirstName 	varchar(50) 	utf8mb4_general_ci 		No 	None 			Change Change 	Drop Drop 	
             3 	LastName 	varchar(80) 	utf8mb4_general_ci 		No 	None 			Change Change 	Drop Drop 	
@@ -52,7 +52,7 @@
             if ($result->num_rows == 1) {
                 // output data of each row
                 while($row = $result->fetch_assoc()) {
-                    if( $row["ISVALID"] > 0 ) $validregistration=true;
+                    $validregistration=true;
                     $FirstName =  $row["FirstName"];
                     $LastName =  $row["LastName"];
                     $Gender =  $row["Gender"];
@@ -136,6 +136,25 @@
             h2 {text-align: center;}
             h3 {text-align: center;}
 
+            .grid-container {
+                display: grid;
+                justify-content: center;
+                grid-template-columns: auto auto auto;
+                background-color: #b3d4f0;
+                padding: 10px;
+                margin-left: 12px;
+                margin-right: 12px;
+                column-gap: 50px;
+                
+            }
+            .grid-item {
+                background-color: rgba(255, 255, 255, 0.8);
+                border: 1px solid rgba(0, 0, 0, 0.8);
+                padding: 20px;
+                font-size: 14px;
+                text-align: center;
+            }
+
         </style>
         
 
@@ -143,7 +162,8 @@
 
     
     <body>
-
+     <!--   < ? php include 'site-menu.php'; ? >  -->
+        
         <div class="logo">
             <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
         </div>
@@ -201,6 +221,28 @@
             </div>
         </nav>
 
+        <?php // DEBUG
+        /*
+        echo "<p>SESSION vars <br />";
+        if(isset($_SESSION["FirstName"] )) echo "FirstName=".$_SESSION["FirstName"]; 
+        echo "<br />";
+        if(isset($_SESSION["LastName"] )) echo "LastName=".$_SESSION["LastName"]; 
+        echo "<br />";
+        if(isset($_SESSION["Gender"] )) echo "Gender=".$_SESSION["Gender"]; 
+        echo "<br />";
+        if(isset($_SESSION["DateOfBirth"] )) echo "DateOfBirth=".$_SESSION["DateOfBirth"]; 
+        echo "<br />";
+        if(isset($_SESSION["username"] )) echo "username=".$_SESSION["username"]; 
+        echo "<br />";
+        if(isset($_SESSION["userid"] )) echo "userid=".$_SESSION["userid"]; 
+        echo "<br />";
+        if(isset($_SESSION["email"] )) echo "email=".$_SESSION["email"]; 
+        echo "<br />";
+        if(isset($_SESSION["userrole"] )) echo "userrole=".$_SESSION["userrole"]; 
+        echo "<br/>=== END</p>";
+        */
+        ?>
+        
         <h1> Προφίλ Χρήστη</h1>
         <!-- TODO:: fetch user info -->
 
@@ -212,22 +254,29 @@
         <!-- profile border -->
         <div class="center" class="element">
 
-
         </div>
 
         <div style="margin-left:auto; margin-right: auto;" >
             <h2> Πληροφορίες Χρήστη</h2>
             <?php if($hasError==false) { ?>
 
-            <table border="1">
-                <tr><td>Όνομα χρήστη:</td> <td> <?php echo $FirstName; ?>  </td> </tr>
-                <tr><td>Επώνυμο χρήστη:</td> <td><?php echo $LastName; ?> </td>  </tr>
-                <tr><td>Φύλλο:</td> <td> <?php if( $Gender=="M") echo "Male";
-                    else if( $Gender=="F") echo "Female";  else echo ""; ?>  </td> </tr>
-                <tr><td>Κωδικός χρήστη:</td> <td> <?php echo $username; ?></td> </tr> <!-- TODO:: create script for showing pass on click -->
-                <tr><td>Ημερομηνία γέννησης:</td> <td> <?php echo $DateOfBirth; ?> </td></tr>
-                <tr><td>email:</td> <td> <?php echo $email; ?> </td></tr>
-            </table>
+                <div class="grid-container">
+                    <div >&nbsp;</div>
+                    <div>
+                    <table border="0" style="padding: 30px;">
+                        <tr><td>Όνομα χρήστη:</td> <td>&nbsp;</td> <td> <?php echo $FirstName; ?>  </td> </tr>
+                        <tr><td>Επώνυμο χρήστη:</td> <td>&nbsp;</td> <td><?php echo $LastName; ?> </td>  </tr>
+                        <tr><td>Φύλλο:</td> <td>&nbsp;</td> <td> <?php if( $Gender=="M") echo "Male";
+                            else if( $Gender=="F") echo "Female";  else echo ""; ?>  </td> </tr>
+                        <tr><td>Ημερομηνία γέννησης:</td> <td>&nbsp;</td> <td> <?php echo $DateOfBirth; ?> </td></tr>
+                        <tr><td>email:</td> <td>&nbsp;</td> <td> <?php echo $email; ?> </td></tr>
+                        <tr><td>Κωδικός χρήστη:</td> <td>&nbsp;</td> <td> <?php echo $username; ?></td> </tr> <!-- TODO:: create script for showing pass on click -->
+                        <tr><td>Επίπεδο πρόσβασης:</td> <td>&nbsp;</td> <td> <?php echo $_SESSION["userrole"]; ?></td> </tr> 
+                    </table>
+                    <div >&nbsp;</div>
+                </div>
+
+            </div>
             <?php } else { ?>
 
                 <h5 style="color:red;">No user information please login or register</h5>

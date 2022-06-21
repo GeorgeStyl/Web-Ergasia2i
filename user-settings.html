@@ -3,13 +3,13 @@ $hasError = false;
 $errormessage="";
 session_start();
 
-$FirstName="sdsdsdsad";
+$FirstName="";
 $LastName="";
 $DateOfBirth="";
 $username="";
 $email="";
 $Gender="";
-
+$username="";
 
 // login to DataBase credentials
 $mysqlserver = "localhost";
@@ -19,30 +19,65 @@ $mysqlpwd = "123456";
 
 if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
 
-
+    $username = $_SESSION["username"];
     // Create connection
     $conn = new mysqli($mysqlserver, $mysqluser, $mysqlpwd, $mysqldb);
     // Check connection
     if ($conn->connect_error) {
         $hasError = true;
         $errormessage="Connection Error";
+        $debugmessage=$errormessage; 
     }
     else {
         if( $_SERVER['REQUEST_METHOD'] == 'POST') {
             // user posted an update of user settings ...
             // update mysql , n otify user succes or failed, load new updated settings
-
-        }
-        else if( $_SERVER['REQUEST_METHOD'] == 'GET')  {
+            // fname=....&lname=....&Day=09&month=09&year=2012&Gender=M&usr=tstylian&email=tstyli%40mmm.gr&psw=&psw-repeat=&remember=on
+            $usr = trim($_POST["usr"]);
+            if( $username != $usr) {
+                // user want to change usrname !!
+                $psw = trim($_POST["psw"]);
+                if($psw == "") {
+                    $hasError = true;
+                    $errormessage="Cannot change username and provide empty password"; 
+                    $debugmessage=$errormessage; 
+                }
+                else {
+                    // check if other user has same username ...
+                    $sql ="select `id`, `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `email`, `username`  from `teliki_ergasia`.`users` " . 
+                    " where `username`='$usr' and `id` <> ".$_SESSION["userid"]." ;";
+                    $result = $conn->query($sql);
+                    if ($result->num_rows > 0) {
+                        $hasError = true;
+                        $errormessage="This username is reserved."; 
+                        $debugmessage=$errormessage;  
+                    }
+                }
+            } 
+            if ($hasError == false) {
+                        $sql = "update `teliki_ergasia`.`users` set `FirstName`='" . trim($_POST["fname"]) . "', " ;
+                        $sql .= "`LastName`='" . trim($_POST["lname"]) . "', " ;
+                        $sql .= "`DateOfBirth`='" . trim($_POST["year"]) . "-" . trim($_POST["month"]) . "-" . trim($_POST["Day"]) . "', " ;
+                        $sql .= "`Gender`='" . trim($_POST["Gender"]) . "', " ;
+                        $sql .= "`email`='" . trim($_POST["email"]) . "' ";
+                        if( $username != $usr){
+                            $sql .=", `username`='" . trim($_POST["usr"]) . "' ";
+                            $sql .=", `password`='" . trim($_POST["psw"]) . "' ";
+                        }
+                        $sql .= " where `id` = ".$_SESSION["userid"]." ;";
+                        $result = $conn->query($sql);
+                        $hasError = false;
+                        $debugmessage="$username != $usr . $sql ";
+            }
+         }
+        if( $_SERVER['REQUEST_METHOD'] == 'POST' || $_SERVER['REQUEST_METHOD'] == 'GET')  {
             // user just access this page, load user settings into form
-
-            $usr = $_SESSION["username"];
-            $sql ="select `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `email`, `username`  from `users` where (  `username`='$usr') ;";
+            $sql ="select `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `email`, `username`  from `teliki_ergasia`.`users` where `id` = ".$_SESSION["userid"]." ;";
             $result = $conn->query($sql);
-            if ($result->num_rows == 1) {
+            if ($result->num_rows > 0) {
                 // output data of each row
                 while($row = $result->fetch_assoc()) {
-                    if( $row["ISVALID"] > 0 ) $validregistration=true;
+                    $validregistration=true;
                     $FirstName =  $row["FirstName"];
                     $LastName =  $row["LastName"];
                     $Gender =  $row["Gender"];
@@ -51,19 +86,20 @@ if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
                     $email =  $row["email"];
                     $hasError = false;
                     $errormessage="OK"; 
-                    break;
-                    
+                    break;                    
                 }
             }
             else {
                 $hasError = true;
-                $errormessage="User not found";              
+                $errormessage="User not found"; 
+                $debugmessage=$errormessage;             
             }
 
         }
         else {
             $hasError = true;
-            $errormessage="Bad http method"; 
+            $errormessage="Bad http method";
+            $debugmessage=$errormessage; 
         }
     }
 
@@ -71,8 +107,8 @@ if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
 else {
     $hasError = true;
     $errormessage="Session Error";
+    $debugmessage=$errormessage;
 }
-
 
 
 
@@ -88,7 +124,6 @@ else {
         <link href="./styles/login_style.css" rel="stylesheet">
         <title>Ρυθμίσεις χρήστη</title>
 
-
         <style>
             .col-1 {
                 width: 80%;
@@ -101,6 +136,8 @@ else {
             body {
                 margin: 0;
                 padding: 0;
+                width: 100%;
+                height: 100%;
                 font-family: Arial, Helvetica, sans-serif;
             }
         
@@ -130,6 +167,12 @@ else {
                 }
             }
             
+            .maincontent {
+                width: 100%;
+                height: 100%;
+                margin-left: 12px;
+                margin-right: 12px;
+            }
 
             .dropdown-content a:hover {background-color: #ddd;}
 
@@ -139,11 +182,18 @@ else {
 
         </style>
 
+        <script>
+
+            function submform(){
+                return true;
+            }
+        </script>
 
     </head>
 
     <body style="background-color: #cad2d9 ">
-
+      <!-- < ? php include 'site-menu.php'; ? >  -->
+    
         <div class="logo">
             <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
         </div>
@@ -200,14 +250,19 @@ else {
                 </a>
             </div>
         </nav>
-
-        
-
-        <form action="user-settings.html" method="post" 
-        id="settingsform" name="settingsform"
-        style="border:1px solid #ccc" onsubmit="event.preventDefault();">
+    
+    
+    <?php 
+    if( $hasError == true ){
+        echo "<h4 style='color:red;'>$errormessage</h4>";
+    }
+    // if(isset($debugmessage)) echo $debugmessage;
+    ?>
+    <div class="maincontent">
+        <form action="user-settings.html" method="post" id="settingsform" name="settingsform"
+            style="border:1px solid #ccc" onsubmit="return submform();">
             <div class="container">
-                <p>Παρακαλώ προσθέστε τα στοιχεία σας για να δημιουργήσετε νέο λογαριασμό ...</p>
+                <p>Ενημερώστε τα στοιχεία σας αν επιθυμείτε ...</p>
                 <hr>
         
                 <label for="First Name"><b>First Name</b></label>
@@ -216,7 +271,9 @@ else {
                 <label for="Last Name"><b>Last Name</b></label>
                 <input type="text" placeholder="Εισάγετε το επίθετο" name="lname" value="<?php echo $LastName; ?>" required> 
     
-                <label for="Date of Birth"><b>Date of birth</b></label>
+               <!--  $DateOfBirth =  $row["DateOfBirth"];  2012-09-09 -->
+
+                <label for="Date of Birth"><b>Date of birth</b> <?php echo $DateOfBirth; ?></label>
                 <br>
                 <div class="birthday">
                 <select name="Day" id="day" required>
@@ -307,25 +364,37 @@ else {
                 </div>
                 <br>
     
+                <script>
+                    // load values to above selects...
+                    let sdob = '<?php echo $DateOfBirth;?>'; //  2012-09-09 -->
+                    let sday = sdob.substr(8,2);
+                    let smonth = sdob.substr(5,2);
+                    let syear = sdob.substr(0,4);
+                    document.getElementById("day").value = sday;
+                    document.getElementById("month").value = smonth;
+                    document.getElementById("year").value = syear;        
+                </script>
+
                 <label for="Gender"><b>Gender</b></label>
                 <br>
                 <div class="gender-radio">
-                    <input type="radio" name="Gender" id="male" value="M" required>Άντρας
-                    <input type="radio" name="Gender" id="female" value="F">Γυναίκα
+                    <input type="radio" name="Gender" id="male" value="M" required <?php if($Gender=="M") echo " checked";?> >Άντρας
+                    <input type="radio" name="Gender" id="female" value="F" <?php if($Gender=="F") echo " checked";?> >Γυναίκα
                 </div>
                 <br>
     
-                <label for="Username"><b>Username</b></label>
-                <input type="text" placeholder="Εισάγετε το username" name="usr" required>
-    
                 <label for="email"><b>Email</b></label>
-                <input type="text" placeholder="Εισάγετε το email" name="email" required>
+                <input type="text" placeholder="Εισάγετε το email" name="email" required value="<?php echo $email;?>">
+    
                 
-                <label for="psw"><b>Password</b></label>
-                <input type="password" placeholder="Εισάγετε το password" name="psw" required>
+                <label for="Username"><b>Username</b> (εισάγετε νέο username αν επιθυμείτε - και τότε και νέο συνθηματικό) </label>
+                <input type="text" placeholder="Εισάγετε το username" name="usr" required value="<?php echo $username;?>">
+    
+                <label for="psw"><b>Password</b> (Ορίστε το νέο σας password αν επιθυμείτε)</label>
+                <input type="password" placeholder="Εισάγετε το password" name="psw">
                 <div class="psw-repeat">
                     <label for="psw-repeat"><b>Confirm Password</b></label>
-                    <input type="password" placeholder="Εισάγετε ξανά το password" name="psw-repeat" required>
+                    <input type="password" placeholder="Εισάγετε ξανά το password" name="psw-repeat">
                     <i class="uil uil-lock icon"></i>
                     <i class="uil uil-eye-slash showHidePw"></i>
                 </div>
@@ -343,14 +412,15 @@ else {
 
         </form>
 
-        <!-- TODO:: NA APOFASISW AN EINAI DOB I PASS -->
-        <label for="Date of Birth"><b> Ορίστε το νέο σας password</b></label>
-        <!-- TODO:: create pass validation -->
-
         <br>
 
         <!-- TODO:: on clikc ckeck if the credentials are ok -->
-        <button type="button" onclick="alert('Οι αλλαγές σας αποθηκεύθηκαν');">Click Me!</button>
+        <button type="submit" >Αποθήκευση</button>
+
+        </div>
+
+        <br>
+
 
     </body>
 
