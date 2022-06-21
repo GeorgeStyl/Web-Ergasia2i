@@ -77,6 +77,37 @@ session_start();
                         <span class="icon-text">Quiz</span>
                     </a>
                 </li>
+
+                <?php
+                if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
+
+                if( $_SESSION["userrole"] == "administrator" ||  $_SESSION["userrole"] == "moderator") {
+                ?>
+                    <li class="nav-item">
+                        <a href="apprv-quest.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/icons8-edit-24.png" />
+                            <span class="icon-text">Approve Questions</span>
+                        </a>
+                    </li>
+                <?php
+                }
+
+                if( $_SESSION["userrole"] == "administrator"){ ?>
+                
+                    <li class="nav-item">
+                        <a href="manage-users.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/group.png" />
+                            <span class="icon-text">Manage users</span>
+                        </a>
+                    </li>                
+                <?php
+                }
+
+                }
+                ?>
+
                 <li class="nav-item">
                     <a href="sign-up.html">
                         <span class="icon"></span>
@@ -100,15 +131,26 @@ session_start();
         </div>
     </nav>
 
-<!-- <?php
-    if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
-        // all aokey, user has session
-        echo "<h5> Welcome  " . $_SESSION["username"] . " ...</h5>";
-    }
-   else {
-    echo " No session, please signin";
-   }
-?> -->
+    <?php 
+    echo "<p>SESSIONS vars <br />";
+    
+    if(isset($_SESSION["FirstName"] )) echo "FirstName=".$_SESSION["FirstName"]; 
+    echo "<br />";
+    if(isset($_SESSION["LastName"] )) echo "LastName=".$_SESSION["LastName"]; 
+    echo "<br />";
+    if(isset($_SESSION["Gender"] )) echo "Gender=".$_SESSION["Gender"]; 
+    echo "<br />";
+    if(isset($_SESSION["DateOfBirth"] )) echo "DateOfBirth=".$_SESSION["DateOfBirth"]; 
+    echo "<br />";
+    if(isset($_SESSION["username"] )) echo "username=".$_SESSION["username"]; 
+    echo "<br />";
+    if(isset($_SESSION["userid"] )) echo "userid=".$_SESSION["userid"]; 
+    echo "<br />";
+    if(isset($_SESSION["email"] )) echo "email=".$_SESSION["email"]; 
+    echo "<br />";
+    if(isset($_SESSION["userrole"] )) echo "userrole=".$_SESSION["userrole"]; 
+    echo "<br/>=== END</p>";
+    ?>
 
 
     <div style="border:1px solid #ccc">

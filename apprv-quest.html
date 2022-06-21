@@ -1,0 +1,607 @@
+<?php
+$hasError = false;
+$errormessage="";
+
+session_start();
+
+if(isset($_SERVER['HTTPS'])) $https = $_SERVER['HTTPS'];
+else $https="";
+$serverport = $_SERVER['SERVER_PORT']; 
+$servname = $_SERVER['SERVER_NAME'];  
+// If the script is running on a virtual host, this will be the value defined for that virtual host.
+$servaddr = $_SERVER['SERVER_ADDR']; 
+if($https == "") $https = "http://" ;  // alloiws https://
+$baseurl = $https . $servname . ":" . $serverport ; // build the base url, example http://localhost:80
+$self    = $_SERVER['PHP_SELF'] ;        // in a php script at the address http://example.com/foo/bar.php would be /foo/bar.php
+$webpath = dirname($_SERVER['PHP_SELF']); // in a php script at the address http://example.com/foo/bar.php would be /foo
+$fullwebpath = $baseurl . $webpath ;      // for this page would be http://localhost:80/webergasia1
+
+
+// login to DataBase credentials
+$mysqlserver = "localhost";
+$mysqldb = "teliki_ergasia";
+$mysqluser = "root";
+$mysqlpwd = "";
+
+
+
+$FirstName="";
+$LastName="";
+$DateOfBirth="";
+$username="";
+$email="";
+$Gender="";
+$userrole="";
+
+
+$arrQuestions = [];                 // new empty array
+// $arrQuestions = array();         // new empty array , same as above
+// $arrQuestions = (array) null;    // new empty array , same as above
+$arrQAnswers = [];
+
+if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
+
+    $userrole = $_SESSION["userrole"];
+    $userid = $_SESSION["userid"];
+
+    // Create connection
+    $conn = new mysqli($mysqlserver, $mysqluser, $mysqlpwd, $mysqldb);
+    // Check connection
+    if ($conn->connect_error) {
+        $hasError = true;
+        $errormessage="Connection Error";
+    }
+    else {
+        if( $_SERVER['REQUEST_METHOD'] == 'POST') {
+
+            if( $userrole == "administrator" || $userrole == "moderator") {
+                //if(qapproval.value && (qapproval.value == "approve" || qapproval.value == "reject" || qapproval.value == "delete" )) {
+                $qid = $_POST['qid'] ;
+
+                if(isset($_POST['qapproval']) && $_POST['qapproval'] =="delete") {
+
+                    $sql ="delete from `teliki_ergasia`.`qanswerslist` where `qid`=$qid ;" ;
+                    // if ($conn->query($sql) === TRUE){
+                    $mysqlaction = $conn->query($sql);                    
+                    $sql ="delete from `teliki_ergasia`.`questlist` where `qid`=$qid ;" ;
+                    $mysqlaction = $conn->query($sql);
+
+                }
+                else if(isset($_POST['qapproval']) && $_POST['qapproval'] =="reject") {
+                    $sql ="update `teliki_ergasia`.`questlist` set `QApproved`=2, `QApprovedOn`=Now(), `QApprovedBy`=".$userid.
+                    " where `qid`=$qid ;" ;
+                    $mysqlaction = $conn->query($sql);
+                }
+                else {
+
+                    $sql ="update `teliki_ergasia`.`questlist` set `QApproved`=1, `QApprovedOn`=Now(), `QApprovedBy`=".$userid.
+                    ", `QDiffLevel`='" . $_POST['qlevel'] . "'" .
+                    ", `QText`='" . $_POST['qtext'] . "'" .
+                    " where `qid`=$qid ;" ;
+                    if ($conn->query($sql) === TRUE){
+                        $snumofansw = $_POST['numofanswers'];
+                        $numofansw = intval($snumofansw);
+                        for($i=0;$i<$numofansw;$i++){ 
+                            $fanswid = "answid_$i";
+                            $answid = $_POST[$fanswid] ;
+                            $fanswtext="answtext_$answid";
+                            $fanswok = "answok_$answid";
+                            $answtext = $_POST[$fanswtext] ;
+                            $answok = $_POST[$fanswok] ;
+                            $sql ="update `teliki_ergasia`.`qanswerslist` set `AnwerText`='$answtext'" .
+                            ", `RightAnswer`=$answok " .
+                            " where `qid`=$qid and `qanswid`=$answid ;" ;
+                            $mysqlaction = $conn->query($sql);
+
+                        }
+                    }
+
+                }
+
+            }
+        }
+
+        if( $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST')
+        {
+            if( $userrole == "administrator" || $userrole == "moderator") {
+                $sql ="select a.`qid`, a.`QText`,a.`QType`,a.`QDiffLevel`,a.`QPostedBy`,a.`QPostedOn`,a.`QApproved`,a.`QApprovedOn`,a.`QApprovedBy`,a.`QIsActive`" .
+                ",b.FirstName, b.LastName".
+                " from `teliki_ergasia`.`questlist` a inner join `teliki_ergasia`.`users` b on a.QPostedBy = b.id  order by a.`QApproved`, a.`QPostedOn`; "; // select all non approved or rejected questions
+
+
+                // QAppralStatus:: 0: new-pwnding, 1: approved, 2: rejected
+                // echo " DEBUG :: $sql ";
+                $result = $conn->query($sql);
+
+                while($row = $result->fetch_assoc()) {
+                    $arrquest = [];
+                    $arrquest['qid'] = $row["qid"] ;
+                    $arrquest['QType'] = $row["QType"] ;
+                    $arrquest['QText'] = $row["QText"] ;
+                    $arrquest['QDiffLevel'] = $row["QDiffLevel"] ;
+                    $arrquest['QPostedBy'] = $row["QPostedBy"] ;
+                    $arrquest['QPostedOn'] = $row["QPostedOn"] ;
+                    $arrquest['QApproved'] = $row["QApproved"] ;
+                    $arrquest['QApprovedOn'] = $row["QApprovedOn"] ;
+                    $arrquest['QApprovedBy'] = $row["QApprovedBy"] ;
+                    $arrquest['PostByFirstName'] = $row["FirstName"] ;
+                    $arrquest['PostByLastName'] = $row["LastName"] ;
+
+                    array_push($arrQuestions, $arrquest);       // array of questions is array of arrays
+
+                    $sql ="SELECT `qid`,`qanswid`,`AnwerText`,`RightAnswer` FROM `teliki_ergasia`.`qanswerslist` where `qid`= ".$row["qid"] . " order by `qanswid`; " ;
+                    // echo " <br > DEBUG :: $sql ";
+                    $res2 = $conn->query($sql);
+                    while($row2 = $res2->fetch_assoc()) {
+                        $arransw = [];
+                        $arransw['qid'] = $row2["qid"] ;
+                        $arransw['qanswid'] = $row2["qanswid"] ;
+                        $arransw['AnwerText'] = $row2["AnwerText"] ;
+                        $arransw['RightAnswer'] = $row2["RightAnswer"] ;
+                        array_push($arrQAnswers, $arransw);                 // array of questionsanswers is array of arrays
+                    }
+                }
+     
+            }
+            else {
+                $hasError = true;
+                $errormessage="Your role does not allow you to approve questions.";              
+            }
+        }
+        else {
+            $hasError = true;
+            $errormessage="Bad http method";             
+        }
+    }
+}
+else {
+    $hasError = true;
+    $errormessage="No session";   
+}
+
+?><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Εγκριση/Απόρριψη Ερωτήσεων</title>
+    <link href="./styles/navbar_style.css" rel="stylesheet">
+    <link href="./styles/sign_up_style.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;  
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .btnok {
+            background-color: #04AA6D;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            
+            opacity: 0.9;
+        }
+        .btncancel {
+            background-color: #ff8080;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            
+            opacity: 0.9;
+        }
+        .qlistdiv {
+            margin-left:10px;
+            margin-right:10px;
+            padding-left: 10px;
+            min-width:800px;
+            width:auto;
+            height:auto;
+            border: 2px solid blue;
+        }
+        .qanswdiv {
+            margin-left:10px;
+            margin-right:10px;
+            padding-left: 10px;
+            width:auto;
+            height:auto;
+            min-width:800px;
+            border: 2px solid green;
+        }
+    </style> 
+
+<script type="text/javascript">
+
+let arrQuestions = [];
+let arrAnswers = [];
+
+<?php
+// build javascript, array of questions objects and array of answers objects
+if($hasError == false) {
+    $scrline = 'let oq ={};';
+    echo $scrline ."\r\n";
+    $scrline = 'let oansw ={};';
+    echo $scrline ."\r\n";   
+    for($i=0;$i<count($arrQuestions);$i++){
+        $scrline = 'oq ={ qid: '. $arrQuestions[$i]['qid'] .'' ;
+        $scrline .= ', QType: "'. $arrQuestions[$i]['QType'] .'"' ;
+        $scrline .= ', QText: "'. $arrQuestions[$i]['QText'] .'"' ;
+        $scrline .= ', QDiffLevel: "'. $arrQuestions[$i]['QDiffLevel'] .'"' ;
+        $scrline .= ', QPostedBy: "'. $arrQuestions[$i]['QPostedBy'] .'"' ;
+        $scrline .= ', QPostedOn: "'. $arrQuestions[$i]['QPostedOn'] .'"' ;
+        $scrline .= ', QApproved: '. $arrQuestions[$i]['QApproved'] .'' ;
+        $scrline .= ', QApprovedOn: "'. $arrQuestions[$i]['QApprovedOn'] .'"' ;
+        $scrline .= ', QApprovedBy: "'. $arrQuestions[$i]['QApprovedBy'] .'"' ;
+        $scrline .= ', PostByFirstName: "'. $arrQuestions[$i]['PostByFirstName'] .'"' ;
+        $scrline .= ', PostByLastName: "'. $arrQuestions[$i]['PostByLastName'] .'"' ;
+        $scrline .= ' };';
+        echo $scrline ."\r\n";
+        $scrline = 'arrQuestions.push(oq);' ;
+        echo $scrline ."\r\n";
+    }
+    
+    for($i=0;$i<count($arrQAnswers);$i++){
+        $scrline = 'oansw ={ qid: '. $arrQAnswers[$i]['qid'] .'' ;
+        $scrline .= ', qanswid: '. $arrQAnswers[$i]['qanswid'] .'' ;
+        $scrline .= ', AnwerText: "'. $arrQAnswers[$i]['AnwerText'] .'"' ;
+        $scrline .= ', RightAnswer: '. $arrQAnswers[$i]['RightAnswer'] .'' ;
+        $scrline .= ' };';
+        echo $scrline ."\r\n";
+        $scrline = 'arrAnswers.push(oansw);' ;
+        echo $scrline ."\r\n";
+    }
+}
+?>
+
+function editQuestion(qid) {
+
+    document.getElementById("questlistdiv").style.display = "none";
+    document.getElementById("diveditq").style.display = "block";
+
+    const elid = "selapq"+qid;
+    const inputel = document.getElementById(elid);
+    document.getElementById(elid).checked = true;
+    /*            ' data-id="' . $arrQuestions[$i]['qid'].'"' .
+            ' data-type="' . $arrQuestions[$i]['QType'].'"' .
+            ' data-level="' . $arrQuestions[$i]['QDiffLevel'].'"' .
+            ' data-status="' . $arrQuestions[$i]['QAppralStatus'].'"' .
+            ' data-text="' . $arrQuestions[$i]['QText'].'"' .
+            ' data-postedon="' . $arrQuestions[$i]['QPostedOn'].'"' .
+            ' data-uname="' . $arrQuestions[$i]['PostByFirstName'].' '.$arrQuestions[$i]['PostByLastName'].'"' .
+            ' data-level="' . $arrQuestions[$i]['QDiffLevel'].'"' .
+            ' data-level="' . $arrQuestions[$i]['QDiffLevel'].'"' .
+    */
+    //article.dataset.columns // "3"
+    document.getElementById('qid').value=inputel.dataset.id;
+    document.getElementById('spanqid').innerHTML = inputel.dataset.id;
+    document.getElementById('qtype').value=inputel.dataset.type;
+    // truefalse, filltext, multiplechoice, singlechoice
+    document.getElementById('qlevel').value=inputel.dataset.level;
+    // easy, medium, hard
+
+    document.forms['formeditq']['qtext'].value = inputel.dataset.text;
+
+    document.getElementById('tanswersbody').innerHTML = ""; // clear table body
+    let numofanswers=0;
+    let html = "";
+    for(i=0;i<arrAnswers.length;i++){
+
+        if(arrAnswers[i].qid == parseInt(inputel.dataset.id)){
+            html += '<tr>';
+                html += '<td>';
+                html += ''+arrAnswers[i].qid;
+                html += '<input type="hidden" name="answid_'+i+'" value="'+arrAnswers[i].qanswid+'">';
+                html += '</td>';
+                html += '<td>';
+                html += ''+arrAnswers[i].qanswid;
+                html += '</td>';
+                html += '<td>';
+                html += '<textarea form="formeditq" rows="3" cols="60" name="answtext_'+arrAnswers[i].qanswid+'" >'+arrAnswers[i].AnwerText+'</textarea>';
+                html += '</td>';
+                html += '<td>';
+                (arrAnswers[i].RightAnswer==1)? html += ' Ναι ' : html += ' Οχι ';                
+                html += '<input type="hidden" name="answok_'+arrAnswers[i].qanswid+'" value="'+arrAnswers[i].RightAnswer+'">';
+                html += '</td>';
+            html += '</tr>';
+            numofanswers++;
+        }
+        document.forms['formeditq']['numofanswers'].value = numofanswers;
+        document.getElementById('tanswersbody').innerHTML = html;
+    }
+  
+}
+
+function canceledit(){
+    document.getElementById('tanswersbody').innerHTML = "";
+    document.getElementById("questlistdiv").style.display = "block";
+    document.getElementById("diveditq").style.display = "none";
+}
+
+function submQuestion(e){
+
+    // e.preventDefault();
+
+    let isvalid = true;
+    let qid = document.getElementById('qid');
+    if(qid.value && qid.value != "") isvalid = true;
+    else isvalid = false;
+    
+    let qtype = document.getElementById('qtype');
+    if(qtype.value && (qtype.value == "truefalse" || qtype.value == "filltext" || qtype.value == "multiplechoice" || qtype.value == "singlechoice" )) {
+        isvalid = true;
+    }
+    else isvalid = false;
+    // truefalse, filltext, multiplechoice, singlechoice
+
+    let qlevel = document.getElementById('qlevel');
+    if(qlevel.value && (qlevel.value == "easy" || qlevel.value == "medium" || qlevel.value == "hard" )) {
+        isvalid = true;
+    }
+    else isvalid = false;
+    // easy, medium, hard
+
+    let qtext = document.forms['formeditq']['qtext'];
+    if(qid.value && qid.value != "") isvalid = true;
+  
+    let qapproval = document.getElementById('qapproval');
+    if(qapproval.value && (qapproval.value == "approve" || qapproval.value == "reject" || qapproval.value == "delete" )) {
+        isvalid = true;
+    }
+    else isvalid = false;
+  
+    // alert("isvalid="+isvalid)
+    return isvalid; 
+    
+    // return false
+}
+</script>
+
+</head>
+
+<body>
+<div class="logo">
+    <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
+</div>
+<nav class="navbar">
+        <div class="navbar-links">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-home.png" />
+                        <span class="icon-text">Home</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="basics.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-basics.png" />
+                        <span class="icon-text">Basics</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="more.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-more.png" />
+                        <span class="icon-text">More</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="quiz.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-quiz.png" />
+                        <span class="icon-text">Quiz</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="sign-up.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-signup.png" />
+                        <span class="icon-text">Sign Up</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="login.html">
+                        <span class="icon"></span>
+                        <img src="./media/Icons/icon-login.png" />
+                        <span class="icon-text">Login</span>
+                    </a>
+                </li>
+            </ul>
+            <a href="#" class="toggle-button">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </a>
+        </div>
+</nav>
+
+
+<?php 
+echo "<p>SESSIONS vars <br />";
+
+if(isset($_SESSION["FirstName"] )) echo "FirstName=".$_SESSION["FirstName"]; 
+echo "<br />";
+if(isset($_SESSION["LastName"] )) echo "LastName=".$_SESSION["LastName"]; 
+echo "<br />";
+if(isset($_SESSION["Gender"] )) echo "Gender=".$_SESSION["Gender"]; 
+echo "<br />";
+if(isset($_SESSION["DateOfBirth"] )) echo "DateOfBirth=".$_SESSION["DateOfBirth"]; 
+echo "<br />";
+if(isset($_SESSION["username"] )) echo "username=".$_SESSION["username"]; 
+echo "<br />";
+if(isset($_SESSION["userid"] )) echo "userid=".$_SESSION["userid"]; 
+echo "<br />";
+if(isset($_SESSION["email"] )) echo "email=".$_SESSION["email"]; 
+echo "<br />";
+if(isset($_SESSION["userrole"] )) echo "userrole=".$_SESSION["userrole"]; 
+echo "<br/>=== END</p>";
+?>
+
+<div id="questlistdiv" style="display:block;" class="qlistdiv">
+
+<?php
+if( $hasError == true) { 
+
+    echo '<p style="color:red;">';
+    echo $errormessage;
+    echo '</p>';
+
+} else { 
+    echo '<h4>Εγκριση/Απόρριψη/Διαγραφή/Τροποποίηση υποβληθείσας Ερώτησης</h4>';
+    echo '<h6>επιλέξετε από τη λίστα</h6>';
+    echo "<table><thead><tr>";
+    echo "<th>Ερ.#</th>";
+    echo "<th>Τύπος</th>";
+    echo "<th>Επίπ.Δυσκολίας</th>";
+    echo "<th>Status</th>";
+    echo "<th>Κείμενο</th>";
+    echo "<th>Posted On</th>";
+    echo "<th>Posted By</th>";
+    echo "<th>action</th>";
+    echo "</tr></thead><tbody>";
+    for($i=0;$i<count($arrQuestions);$i++ )
+    {
+        echo "<tr>";
+            echo "<td>";
+            echo '<input type="hidden" id="selapq'.$arrQuestions[$i]['qid'].'" name="selapq'.$arrQuestions[$i]['qid'].'" value="'.$arrQuestions[$i]['qid'].'"'.
+            ' data-id="' . $arrQuestions[$i]['qid'].'"' .
+            ' data-type="' . $arrQuestions[$i]['QType'].'"' .
+            ' data-level="' . $arrQuestions[$i]['QDiffLevel'].'"' .
+            ' data-status="' . $arrQuestions[$i]['QApproved'].'"' .
+            ' data-text="' . $arrQuestions[$i]['QText'].'"' .
+            ' data-postedon="' . $arrQuestions[$i]['QPostedOn'].'"' .
+            ' data-uname="' . $arrQuestions[$i]['PostByFirstName'].' '.$arrQuestions[$i]['PostByLastName'].'"' .
+            ' data-level="' . $arrQuestions[$i]['QDiffLevel'].'"' .
+            ' data-level="' . $arrQuestions[$i]['QDiffLevel'].'"' .
+            ' >'; 
+            /*   element.dataset.id // "3"     */
+            echo ' ' . $arrQuestions[$i]['qid']. '. ';   
+            echo "</td>";
+            echo "<td>";
+            if( $arrQuestions[$i]['QType'] == "truefalse") {
+                echo "Σωστό/Λάθος"; // radio button group
+            }
+            else if( $arrQuestions[$i]['QType'] == "filltext") {
+                echo "Συνπλήρωση κενού"; // input type="text"
+            }
+            else  if( $arrQuestions[$i]['QType'] == "multiplechoice") {
+                echo "Πολλαπλών επιλογών"; // <select multiple></select>
+            }
+            else  if( $arrQuestions[$i]['QType'] == "singlechoice") {
+                echo "Μονής επιλογής";   // <select single
+            }
+            else {
+                echo " --?-- "; // error
+            }
+            echo "</td>";
+            echo "<td>";
+                // QDiffLevel	easy, medium, hard
+                if( $arrQuestions[$i]['QDiffLevel'] == "easy" ) {
+                    echo "easy"; // easy
+                } else if( $arrQuestions[$i]['QDiffLevel'] == "medium" ) {
+                    echo "medium"; // medium
+                } else if( $arrQuestions[$i]['QDiffLevel'] == "hard" ) {
+                    echo "hard"; // hard
+                } else {
+                    echo " --?-- "; // error
+                }
+            echo "</td>";
+            echo "<td>";
+                echo $arrQuestions[$i]['QApproved'];
+                if( $arrQuestions[$i]['QApproved'] == 0 ) {
+                    echo "-Pending"; 
+                } else if( $arrQuestions[$i]['QApproved'] == 1 ) {
+                    echo "-Approved"; // medium
+                } else if( $arrQuestions[$i]['QApproved'] == 2 ) {
+                    echo "-Rejected"; // hard
+                } else {
+                    echo " --?-- "; // error
+                }
+            echo "</td>";
+            echo "<td>";
+                echo substr($arrQuestions[$i]['QText'],0,60) . ' ...';
+            echo "</td>";
+            echo "<td>";
+                echo $arrQuestions[$i]['QPostedOn'];
+            echo "</td>";
+            echo "<td>";
+                echo $arrQuestions[$i]['PostByFirstName']." ".$arrQuestions[$i]['PostByLastName'];
+            echo "</td>";
+            echo "<td>";
+            echo '<button id="btnselapq'. $arrQuestions[$i]['qid'] . '" onclick="javascript:editQuestion(' .$arrQuestions[$i]['qid']. ');">Edit...</button>';    
+            echo "</td>";
+    
+            echo "</tr>";
+    }
+    echo "</tbody></table>";
+}
+?>
+</div>
+
+<div id="diveditq" style="display:none;" class="qanswdiv">
+
+<form id="formeditq" name="formeditq" method="post" action="apprv-quest.html" onsubmit="return submQuestion(event);" >
+
+<h4>Εγκριση/Απόρριψη/Διαγραφή/Τροποποίηση υποβληθείσας Ερώτησης #<span id="spanqid"></span></h4>
+<input type="hidden" name="qid" id="qid" value="" readonly">
+<!-- <div style="display:flex; flex-direction: row; justify-content: left; align-items: left">
+    <label for="qid">Id: </label>
+    <input type="text" name="qid" id="qid" value="" readonly">
+</div> -->
+<div style="display:flex; flex-direction: row; justify-content: left; align-items: left; gap: 12px;">
+   <label for="qtype"  >Type: </label>
+    <select name="qtype" id="qtype"  disabled="true">
+    <option value="0">--select one--</option>
+    <option value="truefalse">True/False</option>
+    <option value="filltext">Fill Text</option>
+    <option value="multiplechoice">Multiple choice</option>
+    <option value="singlechoice">Single choice</option>
+    </select>
+
+</div>
+<div style="display:flex; flex-direction: row; justify-content: left; align-items: left; gap: 12px;">
+    <label for="qlevel"  >Level: </label>
+    <select name="qlevel" id="qlevel">
+    <option value="0">--select one--</option>
+    <option value="easy">Easy</option>
+    <option value="medium">Medium</option>
+    <option value="hard">Hard</option>
+    </select>
+</div>
+<div style="display:flex; flex-direction: row; justify-content: left; align-items: left; gap: 12px;">
+    <label for="qtext"  >Text: </label>
+    <textarea name="qtext" form="formeditq" rows="3" cols="60"></textarea>
+</div>
+
+<h4>Απαντήσεις</h4>
+<input type="hidden" name="numofanswers"  id="numofanswers" value="0" readonly >
+<table>
+    <thead><tr><th>Ερ#</th><th>Απ#</th><th>Text</th><th>Η Σωστή</th></tr></thead>
+    <tbody id="tanswersbody">
+    </tbody>
+</table>
+
+<div style="display:flex; flex-direction: row; justify-content: left; align-items: left">
+    <label for="qlevel"  >Εγκριση/Απόρριψη/Διαγραφή: </label>
+    <select name="qapproval" id="qapproval">
+    <option value="0">--select one--</option>
+    <option value="approve">Approve</option>
+    <option value="reject">Reject</option>
+    <option value="delete">Delete</option>
+    </select>
+</div>
+
+<input type="submit" form="formeditq" value="Αποθήκευση" class="btnok" />
+&nbsp;
+<input type="button" onclick="canceledit();" class="btncancel" value="Ακύρωση" />
+</form>
+
+</div>
+
+<p>...</p>
+</body>
+</html>

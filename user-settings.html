@@ -1,0 +1,357 @@
+<?php
+$hasError = false;
+$errormessage="";
+session_start();
+
+$FirstName="sdsdsdsad";
+$LastName="";
+$DateOfBirth="";
+$username="";
+$email="";
+$Gender="";
+
+
+// login to DataBase credentials
+$mysqlserver = "localhost";
+$mysqldb = "teliki_ergasia";
+$mysqluser = "root";
+$mysqlpwd = "";
+
+if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
+
+
+    // Create connection
+    $conn = new mysqli($mysqlserver, $mysqluser, $mysqlpwd, $mysqldb);
+    // Check connection
+    if ($conn->connect_error) {
+        $hasError = true;
+        $errormessage="Connection Error";
+    }
+    else {
+        if( $_SERVER['REQUEST_METHOD'] == 'POST') {
+            // user posted an update of user settings ...
+            // update mysql , n otify user succes or failed, load new updated settings
+
+        }
+        else if( $_SERVER['REQUEST_METHOD'] == 'GET')  {
+            // user just access this page, load user settings into form
+
+            $usr = $_SESSION["username"];
+            $sql ="select `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `email`, `username`  from `users` where (  `username`='$usr') ;";
+            $result = $conn->query($sql);
+            if ($result->num_rows == 1) {
+                // output data of each row
+                while($row = $result->fetch_assoc()) {
+                    if( $row["ISVALID"] > 0 ) $validregistration=true;
+                    $FirstName =  $row["FirstName"];
+                    $LastName =  $row["LastName"];
+                    $Gender =  $row["Gender"];
+                    $DateOfBirth =  $row["DateOfBirth"];
+                    $username =  $row["username"];
+                    $email =  $row["email"];
+                    $hasError = false;
+                    $errormessage="OK"; 
+                    break;
+                    
+                }
+            }
+            else {
+                $hasError = true;
+                $errormessage="User not found";              
+            }
+
+        }
+        else {
+            $hasError = true;
+            $errormessage="Bad http method"; 
+        }
+    }
+
+}
+else {
+    $hasError = true;
+    $errormessage="Session Error";
+}
+
+
+
+
+?>
+<!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta  name="viewport" content="width=device-width, initial-scale=1">
+        <link href="./styles/navbar_style.css" rel="stylesheet">
+        <link href="./styles/login_style.css" rel="stylesheet">
+        <title>Ρυθμίσεις χρήστη</title>
+
+
+        <style>
+            .col-1 {
+                width: 80%;
+            }
+        
+            .col-2 {
+                width: 100%
+            }
+        
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+        
+            #btc-photo {
+                margin-top: 1%;
+                margin-right: 50%;
+                width: 350px;
+            }
+        
+            p {
+                font-size: 1.2rem;
+            }
+    
+            @media screen and (max-width: 768px) {
+    
+                #btc-photo {
+                    width: 290px;
+                    
+                }
+            }
+    
+            @media screen and (max-width: 600px) {
+    
+                #btc-photo {
+                    width: 225px;
+                    
+                }
+            }
+            
+
+            .dropdown-content a:hover {background-color: #ddd;}
+
+            .dropdown:hover .dropdown-content {display: block;}
+
+            .dropdown:hover .dropbtn {background-color: #3e8e41;}
+
+        </style>
+
+
+    </head>
+
+    <body style="background-color: #cad2d9 ">
+
+        <div class="logo">
+            <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
+        </div>
+        <nav class="navbar">
+            <div class="navbar-links">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/icon-home.png" />
+                            <span class="icon-text">Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="basics.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/icon-basics.png" />
+                            <span class="icon-text">Basics</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="more.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/icon-more.png" />
+                            <span class="icon-text">More</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="quiz.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/icon-quiz.png" />
+                            <span class="icon-text">Quiz</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="sign-up.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/icon-signup.png" />
+                            <span class="icon-text">Sign Up</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="login.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/icon-login.png" />
+                            <span class="icon-text">Login</span>
+                        </a>
+                    </li>
+                </ul>
+                <a href="#" class="toggle-button">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </a>
+            </div>
+        </nav>
+
+        
+
+        <form action="user-settings.html" method="post" 
+        id="settingsform" name="settingsform"
+        style="border:1px solid #ccc" onsubmit="event.preventDefault();">
+            <div class="container">
+                <p>Παρακαλώ προσθέστε τα στοιχεία σας για να δημιουργήσετε νέο λογαριασμό ...</p>
+                <hr>
+        
+                <label for="First Name"><b>First Name</b></label>
+                <input type="text" placeholder="Εισάγετε το όνομα" name="fname" value="<?php echo $FirstName; ?>" required>
+    
+                <label for="Last Name"><b>Last Name</b></label>
+                <input type="text" placeholder="Εισάγετε το επίθετο" name="lname" value="<?php echo $LastName; ?>" required> 
+    
+                <label for="Date of Birth"><b>Date of birth</b></label>
+                <br>
+                <div class="birthday">
+                <select name="Day" id="day" required>
+                    <option value="">Ημέρα</option>
+                    <option value="01">1</option>
+                    <option value="02">2</option>
+                    <option value="03">3</option>
+                    <option value="04">4</option>
+                    <option value="05">5</option>
+                    <option value="06">6</option>
+                    <option value="07">7</option>
+                    <option value="08">8</option>
+                    <option value="09">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                    <option value="21">21</option>
+                    <option value="22">22</option>
+                    <option value="23">23</option>
+                    <option value="24">24</option>
+                    <option value="25">25</option>
+                    <option value="26">26</option>
+                    <option value="27">27</option>
+                    <option value="28">28</option>
+                    <option value="29">29</option>
+                    <option value="30">30</option>
+                    <option value="31">31</option>
+                </select>
+                <select name="month" id="month" required>
+                    <option value="">Μήνας</option>
+                    <option value="01">Ιανουάριος</option>
+                    <option value="02">Φεβρουάριος</option>
+                    <option value="03">Μάρτιος</option>
+                    <option value="04">Απρίλιος</option>
+                    <option value="05" >Μάιος</option>
+                    <option value="06">Ιούνιος</option>
+                    <option value="07">Ιούλιος</option>
+                    <option value="08">Άυγουστος</option>
+                    <option value="09">Σεπτέμβριος</option>
+                    <option value="10">Οκτώμβριος</option>
+                    <option value="11">Νοέμβριος</option>
+                    <option value="12">Δεκέμβριος</option>
+                </select>
+                <select name="year" id="year" required>
+                    <option value="">Έτος</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                    <option value="2019">2019</option>
+                    <option value="2018">2018</option>
+                    <option value="2017">2017</option>
+                    <option value="2016">2016</option>
+                    <option value="2015">2015</option>
+                    <option value="2014">2014</option>
+                    <option value="2013">2013</option>
+                    <option value="2012">2012</option>
+                    <option value="2011">2011</option>
+                    <option value="2010">2010</option>
+                    <option value="2009">2009</option>
+                    <option value="2008">2008</option>
+                    <option value="2007">2007</option>
+                    <option value="2006">2006</option>
+                    <option value="2005">2005</option>
+                    <option value="2004">2004</option>
+                    <option value="2003">2003</option>
+                    <option value="2002">2002</option>
+                    <option value="2001">2001</option>
+                    <option value="2000">2000</option>
+                    <option value="1999">1999</option>
+                    <option value="1998">1998</option>
+                    <option value="1997">1997</option>
+                    <option value="1996">1996</option>
+                    <option value="1995">1995</option>
+                    <option value="1994">1994</option>
+                    <option value="1993">1993</option>
+                    <option value="1992">1992</option>
+                    <option value="1991">1991</option>
+                    <option value="1990">1990</option>
+                </select>
+                </div>
+                <br>
+    
+                <label for="Gender"><b>Gender</b></label>
+                <br>
+                <div class="gender-radio">
+                    <input type="radio" name="Gender" id="male" value="M" required>Άντρας
+                    <input type="radio" name="Gender" id="female" value="F">Γυναίκα
+                </div>
+                <br>
+    
+                <label for="Username"><b>Username</b></label>
+                <input type="text" placeholder="Εισάγετε το username" name="usr" required>
+    
+                <label for="email"><b>Email</b></label>
+                <input type="text" placeholder="Εισάγετε το email" name="email" required>
+                
+                <label for="psw"><b>Password</b></label>
+                <input type="password" placeholder="Εισάγετε το password" name="psw" required>
+                <div class="psw-repeat">
+                    <label for="psw-repeat"><b>Confirm Password</b></label>
+                    <input type="password" placeholder="Εισάγετε ξανά το password" name="psw-repeat" required>
+                    <i class="uil uil-lock icon"></i>
+                    <i class="uil uil-eye-slash showHidePw"></i>
+                </div>
+    
+                <label for="upload-photo"><b>Upload Photo</b></label>
+                <input type="file" id="real-file" hidden="hidden">
+                <span id="custom-text">Δεν έχετε επιλέξει κάποιο αρχείο ακόμα</span>
+                <button type="button" id="custom-button">Επιλέξτε αρχείο</button>
+                <br>
+                <label>
+                    <input type="checkbox" checked="checked" name="remember" style="margin-bottom:15px"> Αποθήκευση συσκευής
+                </label>
+    
+
+
+        </form>
+
+        <!-- TODO:: NA APOFASISW AN EINAI DOB I PASS -->
+        <label for="Date of Birth"><b> Ορίστε το νέο σας password</b></label>
+        <!-- TODO:: create pass validation -->
+
+        <br>
+
+        <!-- TODO:: on clikc ckeck if the credentials are ok -->
+        <button type="button" onclick="alert('Οι αλλαγές σας αποθηκεύθηκαν');">Click Me!</button>
+
+    </body>
+
+</html>

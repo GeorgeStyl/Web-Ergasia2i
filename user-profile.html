@@ -1,0 +1,252 @@
+<?php
+    $hasError = false;
+    $errormessage="";
+    session_start();
+
+
+    $FirstName="";
+    $LastName="";
+    $DateOfBirth="";
+    $username="";
+    $email="";
+    $Gender="";
+
+    
+    // login to DataBase credentials
+    $mysqlserver = "localhost";
+    $mysqldb = "teliki_ergasia";
+    $mysqluser = "root";
+    $mysqlpwd = "";
+
+
+    if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
+
+        // Create connection
+        $conn = new mysqli($mysqlserver, $mysqluser, $mysqlpwd, $mysqldb);
+        // Check connection
+        if ($conn->connect_error) {
+            $hasError = true;
+            $errormessage="Connection Error";
+        }
+        else
+        {
+            $usr = $_SESSION["username"];
+            $sql ="select `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `email`, `username`  from `users` where (  `username`='$usr') ;";
+            /*
+               FirstName 	varchar(50) 	utf8mb4_general_ci 		No 	None 			Change Change 	Drop Drop 	
+            3 	LastName 	varchar(80) 	utf8mb4_general_ci 		No 	None 			Change Change 	Drop Drop 	
+            4 	DateOfBirth 	date 			No 	None 			Change Change 	Drop Drop 	
+            5 	Gender 	varchar(1) 	utf8mb4_general_ci 		No 	None 			Change Change 	Drop Drop 	
+            6 	username 	varchar(50) 	utf8mb4_general_ci 		No 	None 			Change Change 	Drop Drop 	
+            7 	password 	varchar(80) 	utf8mb4_general_ci 		No 	None 			Change Change 	Drop Drop 	
+            8 	email 	varchar(80) 	utf8mb4_general_ci 		No 	None 			Change Change 	Drop Drop 	
+            9 	DateSigned 	date 			No 	None 			Change Change 	Drop Drop 	
+            10 	DateUpdated 	date 			No 	None 			Change Change 	Drop Drop 	
+            11 	IsActive 	int(11) 			No 	1 			Change Change 	Drop Drop 	
+            12 	Image 	text 	utf8mb4_general_ci 		Yes 	NULL 			Change Change 	Drop Drop 	
+            13 	ImageType 	varchar(25) 	utf8mb4_general_ci 		Yes 	NULL 			Change Change 	Drop Drop 	
+            14 	sessionID 	varchar(128) 	utf8mb4_general_ci 		Yes 	NULL 			Change Change 	Drop Drop 	
+            15 	sessionDT 	datetime 
+            */
+            $result = $conn->query($sql);
+            if ($result->num_rows == 1) {
+                // output data of each row
+                while($row = $result->fetch_assoc()) {
+                    if( $row["ISVALID"] > 0 ) $validregistration=true;
+                    $FirstName =  $row["FirstName"];
+                    $LastName =  $row["LastName"];
+                    $Gender =  $row["Gender"];
+                    $DateOfBirth =  $row["DateOfBirth"];
+                    $username =  $row["username"];
+                    $email =  $row["email"];
+                    $hasError = false;
+                    $errormessage="OK"; 
+                    break;
+                    
+                }
+            }
+            else {
+                $hasError = true;
+                $errormessage="User not found";              
+            } 
+        }
+    }
+    else {
+        $hasError = true;
+        $errormessage="No Session";
+    }
+
+
+
+
+?><!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="./styles/navbar_style.css" rel="stylesheet">
+        <link href="./styles/login_style.css" rel="stylesheet">
+        <title>Προφίλ χρήστη</title>
+
+
+        <style>
+            .col-1 {
+                width: 80%;
+            }
+        
+            .col-2 {
+                width: 100%
+            }
+        
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+        
+            #btc-photo {
+                margin-top: 1%;
+                margin-right: 50%;
+                width: 350px;
+            }
+        
+            p {
+                font-size: 1.2rem;
+            }
+    
+            @media screen and (max-width: 768px) {
+    
+                #btc-photo {
+                    width: 290px;
+                    
+                }
+            }
+    
+            @media screen and (max-width: 600px) {
+    
+                #btc-photo {
+                    width: 225px;
+                    
+                }
+            }
+
+            h1 {text-align: center;}
+            h2 {text-align: center;}
+            h3 {text-align: center;}
+
+        </style>
+        
+
+    </head>
+
+    
+    <body>
+
+        <div class="logo">
+            <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
+        </div>
+        <nav class="navbar">
+            <div class="navbar-links">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/icon-home.png" />
+                            <span class="icon-text">Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="basics.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/icon-basics.png" />
+                            <span class="icon-text">Basics</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="more.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/icon-more.png" />
+                            <span class="icon-text">More</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="quiz.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/icon-quiz.png" />
+                            <span class="icon-text">Quiz</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="sign-up.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/icon-signup.png" />
+                            <span class="icon-text">Sign Up</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="login.html">
+                            <span class="icon"></span>
+                            <img src="./media/Icons/icon-login.png" />
+                            <span class="icon-text">Login</span>
+                        </a>
+                    </li>
+                </ul>
+                <a href="#" class="toggle-button">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </a>
+            </div>
+        </nav>
+
+        <h1> Προφίλ Χρήστη</h1>
+        <!-- TODO:: fetch user info -->
+
+        <br>
+        <div>
+
+        </div>
+        <br>
+        <!-- profile border -->
+        <div class="center" class="element">
+
+
+        </div>
+
+        <div style="margin-left:auto; margin-right: auto;" >
+            <h2> Πληροφορίες Χρήστη</h2>
+            <?php if($hasError==false) { ?>
+
+            <table border="1">
+                <tr><td>Όνομα χρήστη:</td> <td> <?php echo $FirstName; ?>  </td> </tr>
+                <tr><td>Επώνυμο χρήστη:</td> <td><?php echo $LastName; ?> </td>  </tr>
+                <tr><td>Φύλλο:</td> <td> <?php if( $Gender=="M") echo "Male";
+                    else if( $Gender=="F") echo "Female";  else echo ""; ?>  </td> </tr>
+                <tr><td>Κωδικός χρήστη:</td> <td> <?php echo $username; ?></td> </tr> <!-- TODO:: create script for showing pass on click -->
+                <tr><td>Ημερομηνία γέννησης:</td> <td> <?php echo $DateOfBirth; ?> </td></tr>
+                <tr><td>email:</td> <td> <?php echo $email; ?> </td></tr>
+            </table>
+            <?php } else { ?>
+
+                <h5 style="color:red;">No user information please login or register</h5>
+                <p> <?php echo $errormessage; ?> </p>
+            <?php } ?>
+
+            <div>
+
+                <button type="button" class="changeCredentialsBtn" onclick="window.location.href='user-settings.html'">Ρυθμίσεις χρήστη</button>
+            
+            </div>
+
+        </div>
+
+    </body>
+
+
+
+</html>
+
+
+
