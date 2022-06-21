@@ -11,6 +11,11 @@
 
   - ISACTIVE: energos = 1 / 0
 
+# ΤΙ ΜΕΝΕΙ:
+ - ΝΑ ΦΤΙΑΧΤΙΥΝ ΤΑ ΜΕΝΟΥ ΣΩΣΤΑ
+ - ΝΑ ΓΙΝΕΙ ΤΟ LOGOUT
+ - ΝΑ ΓΙΝΕΙ ΣΩΣΤΑ Η QUIZ ΟΠΩΣ ΤΗ ΖΗΤΑΕΙ Ο ΚΑΘΗΓΗΤΗΣ  ΤΙΣ ΕΡΩΤΗΣΕΙΣ ΝΑ ΤΙΣ ΠΑΙΡΝΕΙ ΑΠΟ ΤΗ ΒΑΣΗ)
+ - ΝΑ ΦΤΙΑΧΤΕΙ Η ΣΕΛΙΔΑ ΠΟΥ Ο ΧΡΗΣΤΗΣ ΥΠΟΒΑΛΛΕΙ ΕΡΩΤΗΣΗ ΓΙΑ ΝΑ ΠΡΟΣΤΕΘΕΙ ΣΤΙΣ ΕΡΩΤΗΣΕΙΣ
 # **Αλλαγες στα ηδη υπαρχον files**
 
 ## sign-up.html
@@ -52,3 +57,4 @@
 - create score on quiz for every user (included guests)
 - create a profile section on menu with icon
 - create a profile settings page
+
