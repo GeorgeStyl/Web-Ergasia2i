@@ -57,4 +57,102 @@
 - create score on quiz for every user (included guests)
 - create a profile section on menu with icon
 - create a profile settings page
+    
+    
+Πίνακας Διαθέσιμων Ερωτήσεων:  
+CREATE TABLE `questlist` (  
+  `qid` int NOT NULL AUTO_INCREMENT,  
+  `QText` mediumtext NOT NULL,			-- το κείμενο της ερωτησης  
+  `QType` varchar(15) NOT NULL,			-- ενα από truefalse, filltext, multiplechoice, singlechoice  
+  `QDiffLevel` varchar(50) NOT NULL,	-- ενα από easy, medium, hard  
+  `QApproved` int NOT NULL DEFAULT '0',	-- 0: for approval, 1=approved, 2=rejected  
+  `QApprovedBy` int NULL DEFAULT '0',	-- userid of user approved/rejected  
+  `QApprovedOn` datetime NULL,  
+  `QIsActive` int NOT NULL DEFAULT '1',	  -- 1=active, 0=non active  
+  `QPostedBy` int NOT NULL,				        -- userid of user posted  
+  `QPostedOn` datetime NOT NULL, 
+  PRIMARY KEY (`qid`)  
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;  
+  
+ALTER TABLE `teliki_ergasia`.`questlist`   
+CHANGE COLUMN `QApprovedBy` `QApprovedBy` INT NULL DEFAULT '0' ,  
+CHANGE COLUMN `QApprovedOn` `QApprovedOn` DATETIME NULL ;  
+  
+τύπος truefalse	=> radio buttongroup or single <select>  
+τύπος filltext	=> input type="text"  
+τύπος multiplechoice => <select  multiple> or fieldset of checkboxes  
+τύπος singlechoice => radio buttongroup or single <select>  
+  
+Πίνακας απαντήσεων των παραπάνω διαθέσιμων ερωτήσεων  
+CREATE TABLE `qanswerslist` (
+  `qid` int NOT NULL,						-- το id της ερώτησης του πίνακα `questlist`
+  `qanswid` int NOT NULL AUTO_INCREMENT,	-- (auto) αυξων id της απάντησης
+  `AnwerText` varchar(150) NOT NULL,		-- κείμενο απάντησης
+  `RightAnswer` int NOT NULL DEFAULT '0',  -- 0: λανθασμενη απάντηση, 1: σωστή απάντηση
+  PRIMARY KEY (`qanswid`),
+  KEY `PK_QAnswerList` (`qid`,`qanswid`) /*!80000 INVISIBLE */
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;  
+  
+
+  
+INSERT INTO `teliki_ergasia`.`questlist`
+(`QText`,
+`QType`,
+`QDiffLevel`,
+`QPostedBy`,
+`QPostedOn`,
+`QApproved`
+)
+VALUES
+(
+'Το bitcoin είναι ένα ψηφιακό νόμισμα και δεν εκδίδεται απο κάποια τράπεζα',
+'truefalse',
+'medium',
+1,
+Now(),
+0
+);  
+
+RightAnswer :: 1=yes, 0=No  
+INSERT INTO `teliki_ergasia`.`qanswerslist`
+(`qid`,`AnwerText`,`RightAnswer`) VALUES (1,'Σωστό ', 1);  
+INSERT INTO `teliki_ergasia`.`qanswerslist`
+(`qid`,`AnwerText`,`RightAnswer`) VALUES (1,'Λάθος ', 0);  
+  
+Ερώτηση 2:Με ποίον τρόπο συνδέεται το Ether με το Ethereum?  
+  
+1)Καμία, το Ether η αλλιώς αιθέρας χρησιμοποιείται στην οργανική χημεία  
+2)Το Ether είναι κρυπτονόμισμα και το Ethereum ειναι μία blockhain πλατφόρμα  
+3)Το Ethereum είναι κρυπτονόμισμα και το Ether είναι μία blockchain πλατφόρμα  
+4)Και τα 2 είναι κρυπτονομίσματα αλλά το Ether είναι πιό ακριβό από το Ethereum  
+  
+INSERT INTO `teliki_ergasia`.`questlist`
+(`QText`,
+`QType`,
+`QDiffLevel`,
+`QPostedBy`,
+`QPostedOn`,
+`QApproved`
+)
+VALUES
+(
+'Με ποίον τρόπο συνδέεται το Ether με το Ethereum?',
+'singlechoice',
+'medium',
+1,
+Now(),
+0
+);  
+==> id = 3  
+INSERT INTO `teliki_ergasia`.`qanswerslist`
+(`qid`,`AnwerText`,`RightAnswer`) VALUES (3,'Καμία, το Ether η αλλιώς αιθέρας χρησιμοποιείται στην οργανική χημεία', 0);  
+INSERT INTO `teliki_ergasia`.`qanswerslist`
+(`qid`,`AnwerText`,`RightAnswer`) VALUES (3,'Το Ether είναι κρυπτονόμισμα και το Ethereum ειναι μία blockhain πλατφόρμα', 1);  
+INSERT INTO `teliki_ergasia`.`qanswerslist`
+(`qid`,`AnwerText`,`RightAnswer`) VALUES (3,'Το Ethereum είναι κρυπτονόμισμα και το Ether είναι μία blockchain πλατφόρμα', 0);  
+INSERT INTO `teliki_ergasia`.`qanswerslist`
+(`qid`,`AnwerText`,`RightAnswer`) VALUES (3,'Και τα 2 είναι κρυπτονομίσματα αλλά το Ether είναι πιό ακριβό από το Ethereum', 0);  
+  
+-- QType	truefalse, filltext, multiplechoice, singlechoice  
+-- QDiffLevel	easy, medium, hard  
 
