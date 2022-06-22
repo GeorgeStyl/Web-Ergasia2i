@@ -159,4 +159,53 @@ INSERT INTO `teliki_ergasia`.`qanswerslist`
 --------------------------------    
 -- QType	truefalse, filltext, multiplechoice, singlechoice  
 -- QDiffLevel	easy, medium, hard  
+-----------------------------------  
+CREATE TABLE `users` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `FirstName` varchar(50) NOT NULL,
+  `LastName` varchar(80) NOT NULL,
+  `DateOfBirth` date NOT NULL,
+  `Gender` varchar(1) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(80) NOT NULL,
+  `email` varchar(80) NOT NULL,
+  `DateSigned` date NOT NULL,
+  `DateUpdated` date NOT NULL,
+  `IsActive` int NOT NULL DEFAULT '1',
+  `Image` text,
+  `ImageType` varchar(25) DEFAULT NULL,
+  `sessionID` varchar(128) DEFAULT NULL,
+  `sessionDT` datetime DEFAULT NULL,
+  `userrole` varchar(45) DEFAULT 'registereduser',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+Προστέθηκε το πεδίο `userrole` varchar(45) , κρατά τους ρόλους του χρήστη: registereduser, moderator, administrator
+Αν ο χρήστης δεν έχει κάνει login θεωρείται visitor
+
+
+INSERT INTO `teliki_ergasia`.`users`
+(`FirstName`,
+`LastName`,
+`DateOfBirth`,
+`Gender`,
+`username`,
+`password`,
+`email`,
+`DateSigned`,
+`DateUpdated`,
+`IsActive`,
+`userrole`)
+VALUES
+('Admin',
+'Admin',
+'20000101',
+'A',
+'admin',
+'123456',
+'admin@supperapp.com',
+Now(),
+Now(),
+1,
+'administrator' );  
+
 
