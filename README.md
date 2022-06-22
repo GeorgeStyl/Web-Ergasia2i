@@ -74,7 +74,7 @@ CREATE TABLE `questlist` (
   PRIMARY KEY (`qid`)  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;  
   
-ALTER TABLE `teliki_ergasia`.`questlist`   
+ALTER TABLE `teliki_ergasia`.`questlist`  
 CHANGE COLUMN `QApprovedBy` `QApprovedBy` INT NULL DEFAULT '0' ,  
 CHANGE COLUMN `QApprovedOn` `QApprovedOn` DATETIME NULL ;  
   
@@ -82,7 +82,7 @@ CHANGE COLUMN `QApprovedOn` `QApprovedOn` DATETIME NULL ;
 τύπος filltext	=> input type="text"  
 τύπος multiplechoice => <select  multiple> or fieldset of checkboxes  
 τύπος singlechoice => radio buttongroup or single <select>  
-  
+------------------------   
 Πίνακας απαντήσεων των παραπάνω διαθέσιμων ερωτήσεων  
 CREATE TABLE `qanswerslist` (
   `qid` int NOT NULL,						-- το id της ερώτησης του πίνακα `questlist`  
@@ -92,9 +92,7 @@ CREATE TABLE `qanswerslist` (
   PRIMARY KEY (`qanswid`),  
   KEY `PK_QAnswerList` (`qid`,`qanswid`)   
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;  
-  
-  
-  
+------------------------------------------------    
 INSERT INTO `teliki_ergasia`.`questlist`
 (`QText`,
 `QType`,
@@ -112,20 +110,21 @@ VALUES
 Now(),
 0
 );  
-  
+--------------------------------------------------  
 RightAnswer :: 1=yes, 0=No  
 INSERT INTO `teliki_ergasia`.`qanswerslist`
 (`qid`,`AnwerText`,`RightAnswer`) VALUES (1,'Σωστό ', 1);  
+----------------  
 INSERT INTO `teliki_ergasia`.`qanswerslist`
 (`qid`,`AnwerText`,`RightAnswer`) VALUES (1,'Λάθος ', 0);  
-  
+------------------  
 Ερώτηση 2:Με ποίον τρόπο συνδέεται το Ether με το Ethereum?  
-  
+-------------------  
 1)Καμία, το Ether η αλλιώς αιθέρας χρησιμοποιείται στην οργανική χημεία  
 2)Το Ether είναι κρυπτονόμισμα και το Ethereum ειναι μία blockhain πλατφόρμα  
 3)Το Ethereum είναι κρυπτονόμισμα και το Ether είναι μία blockchain πλατφόρμα  
 4)Και τα 2 είναι κρυπτονομίσματα αλλά το Ether είναι πιό ακριβό από το Ethereum  
-  
+--------------------------------------------  
 INSERT INTO `teliki_ergasia`.`questlist`
 (`QText`,
 `QType`,
@@ -143,16 +142,21 @@ VALUES
 Now(),
 0
 );  
+
 ==> id = 3  
+------------------------------------  
 INSERT INTO `teliki_ergasia`.`qanswerslist`
 (`qid`,`AnwerText`,`RightAnswer`) VALUES (3,'Καμία, το Ether η αλλιώς αιθέρας χρησιμοποιείται στην οργανική χημεία', 0);  
+
 INSERT INTO `teliki_ergasia`.`qanswerslist`
 (`qid`,`AnwerText`,`RightAnswer`) VALUES (3,'Το Ether είναι κρυπτονόμισμα και το Ethereum ειναι μία blockhain πλατφόρμα', 1);  
+
 INSERT INTO `teliki_ergasia`.`qanswerslist`
 (`qid`,`AnwerText`,`RightAnswer`) VALUES (3,'Το Ethereum είναι κρυπτονόμισμα και το Ether είναι μία blockchain πλατφόρμα', 0);  
+
 INSERT INTO `teliki_ergasia`.`qanswerslist`
 (`qid`,`AnwerText`,`RightAnswer`) VALUES (3,'Και τα 2 είναι κρυπτονομίσματα αλλά το Ether είναι πιό ακριβό από το Ethereum', 0);  
-  
+--------------------------------    
 -- QType	truefalse, filltext, multiplechoice, singlechoice  
 -- QDiffLevel	easy, medium, hard  
 
