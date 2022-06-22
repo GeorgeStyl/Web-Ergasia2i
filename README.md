@@ -85,15 +85,15 @@ CHANGE COLUMN `QApprovedOn` `QApprovedOn` DATETIME NULL ;
   
 Πίνακας απαντήσεων των παραπάνω διαθέσιμων ερωτήσεων  
 CREATE TABLE `qanswerslist` (
-  `qid` int NOT NULL,						-- το id της ερώτησης του πίνακα `questlist`
-  `qanswid` int NOT NULL AUTO_INCREMENT,	-- (auto) αυξων id της απάντησης
-  `AnwerText` varchar(150) NOT NULL,		-- κείμενο απάντησης
-  `RightAnswer` int NOT NULL DEFAULT '0',  -- 0: λανθασμενη απάντηση, 1: σωστή απάντηση
-  PRIMARY KEY (`qanswid`),
-  KEY `PK_QAnswerList` (`qid`,`qanswid`) /*!80000 INVISIBLE */
+  `qid` int NOT NULL,						-- το id της ερώτησης του πίνακα `questlist`  
+  `qanswid` int NOT NULL AUTO_INCREMENT,	-- (auto) αυξων id της απάντησης  
+  `AnwerText` varchar(150) NOT NULL,		-- κείμενο απάντησης  
+  `RightAnswer` int NOT NULL DEFAULT '0',  -- 0: λανθασμενη απάντηση, 1: σωστή απάντηση  
+  PRIMARY KEY (`qanswid`),  
+  KEY `PK_QAnswerList` (`qid`,`qanswid`)   
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;  
   
-
+  
   
 INSERT INTO `teliki_ergasia`.`questlist`
 (`QText`,
@@ -112,7 +112,7 @@ VALUES
 Now(),
 0
 );  
-
+  
 RightAnswer :: 1=yes, 0=No  
 INSERT INTO `teliki_ergasia`.`qanswerslist`
 (`qid`,`AnwerText`,`RightAnswer`) VALUES (1,'Σωστό ', 1);  
