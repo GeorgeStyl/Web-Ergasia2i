@@ -40,7 +40,9 @@ else {
 </head>   
 
 <body>
-
+<?php include 'site-menu.php';?>
+<?php include 'insert-data.php';?>
+<!-- 
   <a href="/basics.html" > goto basics </a>
     <div class="logo">
       <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
@@ -98,7 +100,7 @@ else {
         </a>
       </div>
     </nav>
-      
+-->
     <div class="container">
       <div id="question-container" class="hide">
         <div id="question">Question</div>
@@ -110,7 +112,7 @@ else {
         </div>
       </div>
       <div class="controls">
-        <button id="start-btn" class="start-btn btn">Start</button>
+        <a href="question.php" id="start-btn" class="start-btn btn">Start</a>
         <button id="next-btn" class="next-btn btn hide">Next</button>
       </div>
     </div>

@@ -20,8 +20,8 @@ $fullwebpath = $baseurl . $webpath ;      // for this page would be http://local
 // login to DataBase credentials
 $mysqlserver = "localhost";
 $mysqldb = "teliki_ergasia";
-$mysqluser = "root";
-$mysqlpwd = "";
+$mysqluser = "webapp";
+$mysqlpwd = "123456";
 
 
 
@@ -55,7 +55,6 @@ if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
         if( $_SERVER['REQUEST_METHOD'] == 'POST') {
 
             if( $userrole == "administrator" || $userrole == "moderator") {
-                //if(qapproval.value && (qapproval.value == "approve" || qapproval.value == "reject" || qapproval.value == "delete" )) {
                 $qid = $_POST['qid'] ;
 
                 if(isset($_POST['qapproval']) && $_POST['qapproval'] =="delete") {
@@ -140,6 +139,7 @@ if(isset($_SESSION["username"]) && $_SESSION["username"] != "") {
                         $arransw['RightAnswer'] = $row2["RightAnswer"] ;
                         array_push($arrQAnswers, $arransw);                 // array of questionsanswers is array of arrays
                     }
+
                 }
      
             }
@@ -213,7 +213,7 @@ else {
         }
     </style> 
 
-<script type="text/javascript">
+<script>
 
 let arrQuestions = [];
 let arrAnswers = [];
@@ -221,38 +221,19 @@ let arrAnswers = [];
 <?php
 // build javascript, array of questions objects and array of answers objects
 if($hasError == false) {
-    $scrline = 'let oq ={};';
-    echo $scrline ."\r\n";
-    $scrline = 'let oansw ={};';
-    echo $scrline ."\r\n";   
-    for($i=0;$i<count($arrQuestions);$i++){
-        $scrline = 'oq ={ qid: '. $arrQuestions[$i]['qid'] .'' ;
-        $scrline .= ', QType: "'. $arrQuestions[$i]['QType'] .'"' ;
-        $scrline .= ', QText: "'. $arrQuestions[$i]['QText'] .'"' ;
-        $scrline .= ', QDiffLevel: "'. $arrQuestions[$i]['QDiffLevel'] .'"' ;
-        $scrline .= ', QPostedBy: "'. $arrQuestions[$i]['QPostedBy'] .'"' ;
-        $scrline .= ', QPostedOn: "'. $arrQuestions[$i]['QPostedOn'] .'"' ;
-        $scrline .= ', QApproved: '. $arrQuestions[$i]['QApproved'] .'' ;
-        $scrline .= ', QApprovedOn: "'. $arrQuestions[$i]['QApprovedOn'] .'"' ;
-        $scrline .= ', QApprovedBy: "'. $arrQuestions[$i]['QApprovedBy'] .'"' ;
-        $scrline .= ', PostByFirstName: "'. $arrQuestions[$i]['PostByFirstName'] .'"' ;
-        $scrline .= ', PostByLastName: "'. $arrQuestions[$i]['PostByLastName'] .'"' ;
-        $scrline .= ' };';
-        echo $scrline ."\r\n";
-        $scrline = 'arrQuestions.push(oq);' ;
-        echo $scrline ."\r\n";
-    }
-    
-    for($i=0;$i<count($arrQAnswers);$i++){
-        $scrline = 'oansw ={ qid: '. $arrQAnswers[$i]['qid'] .'' ;
-        $scrline .= ', qanswid: '. $arrQAnswers[$i]['qanswid'] .'' ;
-        $scrline .= ', AnwerText: "'. $arrQAnswers[$i]['AnwerText'] .'"' ;
-        $scrline .= ', RightAnswer: '. $arrQAnswers[$i]['RightAnswer'] .'' ;
-        $scrline .= ' };';
-        echo $scrline ."\r\n";
-        $scrline = 'arrAnswers.push(oansw);' ;
-        echo $scrline ."\r\n";
-    }
+    /* echo json_encode($arrQuestions); => a string in the form ::
+       [ {"qid":"2", "QType":"truefalse", "QText":".....", "QDiffLevel":"medium", "QPostedBy":"1",
+        "QPostedOn":"2022-06-20 17:04:11", "QApproved":"0", "QApprovedOn":null, "QApprovedBy":"0",
+        "PostByFirstName":"Admin", "PostByLastName":"Admin" },     {"qid":"3", ..........} ]
+    */
+    $js_array = json_encode($arrQuestions);
+    echo "arrQuestions =". $js_array . ";\n";
+
+    /* echo json_encode($arrQAnswers); =>  a string in the form ::
+        [ {"qid":"2", "qanswid":"3", "AnwerText":".....", "RightAnswer":"1" }, {"qid":"2", ...} ] 
+    */
+    $js_array = json_encode($arrQAnswers);
+    echo "arrAnswers =". $js_array . ";\n";
 }
 ?>
 
@@ -362,6 +343,13 @@ function submQuestion(e){
 </head>
 
 <body>
+<?php // DEBUG
+// echo "arrQuestions = ". print_r( $arrQuestions, true ) . "<br>";
+// echo "arrQAnswers = " .  print_r( $arrQAnswers, true ) . "<br>";
+?>
+
+<!-- < ? php include 'site-menu.php'; ? > -->
+
 <div class="logo">
     <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
 </div>
@@ -421,8 +409,8 @@ function submQuestion(e){
 
 
 <?php 
-echo "<p>SESSIONS vars <br />";
-
+/* DEBUG::
+echo "<p>SESSION vars <br />";
 if(isset($_SESSION["FirstName"] )) echo "FirstName=".$_SESSION["FirstName"]; 
 echo "<br />";
 if(isset($_SESSION["LastName"] )) echo "LastName=".$_SESSION["LastName"]; 
@@ -439,6 +427,7 @@ if(isset($_SESSION["email"] )) echo "email=".$_SESSION["email"];
 echo "<br />";
 if(isset($_SESSION["userrole"] )) echo "userrole=".$_SESSION["userrole"]; 
 echo "<br/>=== END</p>";
+*/
 ?>
 
 <div id="questlistdiv" style="display:block;" class="qlistdiv">
@@ -523,7 +512,7 @@ if( $hasError == true) {
                 }
             echo "</td>";
             echo "<td>";
-                echo substr($arrQuestions[$i]['QText'],0,60) . ' ...';
+                echo mb_substr($arrQuestions[$i]['QText'],0,60) . ' ...';
             echo "</td>";
             echo "<td>";
                 echo $arrQuestions[$i]['QPostedOn'];
@@ -587,7 +576,7 @@ if( $hasError == true) {
 
 <div style="display:flex; flex-direction: row; justify-content: left; align-items: left">
     <label for="qlevel"  >Εγκριση/Απόρριψη/Διαγραφή: </label>
-    <select name="qapproval" id="qapproval">
+    <select name="qapproval" id="qapproval" required>
     <option value="0">--select one--</option>
     <option value="approve">Approve</option>
     <option value="reject">Reject</option>

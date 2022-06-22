@@ -43,6 +43,8 @@ session_start();
 </head>
 
 <body>
+    <?php include 'site-menu.php';?>
+<!-- 
     <div class="logo">
         <img src="./media/Logo/logotop.svg" id="logo" alt="bitcoin-logo">
     </div>
@@ -130,10 +132,10 @@ session_start();
             </a>
         </div>
     </nav>
-
+-->
     <?php 
-    echo "<p>SESSIONS vars <br />";
-    
+    /*
+    echo "<p>SESSION vars <br />";
     if(isset($_SESSION["FirstName"] )) echo "FirstName=".$_SESSION["FirstName"]; 
     echo "<br />";
     if(isset($_SESSION["LastName"] )) echo "LastName=".$_SESSION["LastName"]; 
@@ -150,6 +152,7 @@ session_start();
     echo "<br />";
     if(isset($_SESSION["userrole"] )) echo "userrole=".$_SESSION["userrole"]; 
     echo "<br/>=== END</p>";
+    */
     ?>
 
 

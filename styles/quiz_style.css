@@ -57,6 +57,10 @@ body.wrong {
   font-size: 1.2rem;
 }
 
+.a{
+  text-decoration: none;
+}
+
 .btn:hover {
   border-color: black;
 }
